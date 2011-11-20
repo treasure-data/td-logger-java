@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.fluentd.logger.Event;
-import org.fluentd.logger.EventTemplate;
+import org.fluentd.logger.sender.Event;
+import org.fluentd.logger.sender.EventTemplate;
 import org.fluentd.logger.sender.Sender;
 import org.msgpack.MessagePack;
 
