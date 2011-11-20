@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.fluentd.logger.Event;
+import org.fluentd.logger.EventTemplate;
+import org.fluentd.logger.sender.Sender;
 import org.msgpack.MessagePack;
 
-import com.treasure_data.logger.Sender;
-
-
-public class MockServer extends Thread {
+public class MockFluentd extends Thread {
 
     public static interface MockProcess {
         public void process(MessagePack msgpack, Socket socket) throws IOException;
@@ -21,9 +21,9 @@ public class MockServer extends Thread {
 
     private MockProcess process;
 
-    public MockServer(int port, MockProcess mockProcess) throws IOException {
+    public MockFluentd(int port, MockProcess mockProcess) throws IOException {
         msgpack = new MessagePack();
-        msgpack.register(Sender.Event.class, Sender.EventTemplate.INSTANCE);
+        msgpack.register(Event.class, EventTemplate.INSTANCE);
         serverSocket = new ServerSocket(port);
         process = mockProcess;
     }
