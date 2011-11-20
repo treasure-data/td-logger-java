@@ -10,35 +10,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.fluentd.logger.Event;
 import org.junit.Test;
 import org.msgpack.MessagePack;
 import org.msgpack.unpacker.Unpacker;
 
-import com.treasure_data.logger.TDLogger;
-import com.treasure_data.logger.Sender;
+import com.treasure_data.logger.TreasureDataLogger;
 
-public class TestTDLoggerNormalOperation {
+public class TestTreasureDataLoggerNormalOperation {
 
-    private static List<Sender.Event> no01 = new ArrayList<Sender.Event>();
+    private static List<Event> no01 = new ArrayList<Event>();
 
     @Test
     public void testNormalOperation01() throws Exception {
         int port = 24224;
 
         // start mock server
-        MockServer server = new MockServer(port, new MockServer.MockProcess() {
+        MockFluentd server = new MockFluentd(port, new MockFluentd.MockProcess() {
             public void process(MessagePack msgpack, Socket socket) throws IOException {
                 BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
                 Unpacker unpacker = msgpack.createUnpacker(in);
-                no01.add(unpacker.read(Sender.Event.class));
-                no01.add(unpacker.read(Sender.Event.class));
+                no01.add(unpacker.read(Event.class));
+                no01.add(unpacker.read(Event.class));
                 socket.close();
             }
         });
         server.start();
 
         // create logger object
-        TDLogger logger = TDLogger.getLogger("tag", "localhost", 24224);
+        TreasureDataLogger logger = TreasureDataLogger.getLogger("tag");
         Map<String, String> data = new HashMap<String, String>();
         data.put("t1k1", "t1v1");
         data.put("t1k2", "t1v2");
@@ -58,13 +58,13 @@ public class TestTDLoggerNormalOperation {
         // check data
         assertEquals(2, no01.size());
         {
-            Sender.Event e = no01.get(0);
+            Event e = no01.get(0);
             assertEquals("tag.label1", e.tag);
             assertEquals("t1v1", e.data.get("t1k1"));
             assertEquals("t1v2", e.data.get("t1k2"));
         }
         {
-            Sender.Event e = no01.get(1);
+            Event e = no01.get(1);
             assertEquals("tag.label2", e.tag);
             assertEquals("t2v1", e.data.get("t2k1"));
             assertEquals("t2v2", e.data.get("t2k2"));
