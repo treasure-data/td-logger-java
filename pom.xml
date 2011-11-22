@@ -3,8 +3,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.treasure_data</groupId>
   <artifactId>td-logger</artifactId>
-  <name>TD Logger for Java</name>
-  <description>Java implementation of TD Logger.</description>
+  <name>Treasure Data Logger for Java</name>
+  <description>Java implementation of Treasure Data Logger.</description>
   <version>0.1.0</version>
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-logger-java</url>
