@@ -22,8 +22,14 @@ import java.util.Properties;
 import java.util.WeakHashMap;
 
 import org.fluentd.logger.FluentLogger;
+import org.fluentd.logger.sender.RawSocketSender;
+import org.fluentd.logger.sender.Sender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TreasureDataLogger extends FluentLogger {
+
+    private static Logger LOG = LoggerFactory.getLogger(TreasureDataLogger.class);
 
     private static Map<String, TreasureDataLogger> loggers = new WeakHashMap<String, TreasureDataLogger>();
 
@@ -33,14 +39,18 @@ public class TreasureDataLogger extends FluentLogger {
     }
 
     public static synchronized TreasureDataLogger getLogger(String database, Properties props) {
+        if (database == null || database.equals("")) {
+            throw new NullPointerException(
+                    "Cannot specify null or null charactor as value of database");
+        }
+
         String host;
         int port, timeout, bufferCapacity;
         boolean agentMode = Boolean.parseBoolean(props.getProperty(
                 Config.TD_LOGGER_AGENTMODE, Config.TD_LOGGER_AGENTMODE_DEFAULT));
 
         if (!agentMode) {
-            // TODO #MN must implement it soon
-            throw new UnsupportedOperationException();// TODO
+            throw new UnsupportedOperationException();// TODO #MN must implement it soon
         } else {
             host = props.getProperty(
                     Config.TD_LOGGER_AGENT_HOST, Config.TD_LOGGER_AGENT_HOST_DEFAULT);
@@ -57,13 +67,15 @@ public class TreasureDataLogger extends FluentLogger {
         if (loggers.containsKey(key)) {
             return loggers.get(key);
         } else {
+            // create logger object
+            LOG.info(String.format("Creates logger(%s)", new Object[] { key }));
             TreasureDataLogger logger;
             if (!agentMode) { // connected to TD platform directly
-                // TODO #MN must implement it soon
-                logger = null;
-                throw new UnsupportedOperationException();// TODO
+                throw new UnsupportedOperationException();// TODO #MN must implement it soon
+                //logger = new TreasureDataLogger(database, new HttpSender());
             } else { // agent mode is connected to specified fluentd
-                logger = new TreasureDataLogger(database, host, port, timeout, bufferCapacity);
+                logger = new TreasureDataLogger(database,
+                        new RawSocketSender(host, port, timeout, bufferCapacity));
             }
             loggers.put(key, logger);
             return logger;
@@ -71,13 +83,34 @@ public class TreasureDataLogger extends FluentLogger {
     }
 
     public static synchronized void close() {
-        for (TreasureDataLogger logger : loggers.values()) {
-            logger.close0();
+        for (Map.Entry<String, TreasureDataLogger> e : loggers.entrySet()) {
+            LOG.info(String.format("Closes logger(%s)", new Object[] { e.getKey() }));
+            e.getValue().close0();
         }
     }
 
-    protected TreasureDataLogger(String database, String host, int port, int timeout, int bufferCapacity) {
-        super(database, host, port, timeout, bufferCapacity);
+    protected TreasureDataLogger(String database, Sender sender) {
+        super(database, sender);
+    }
+
+    @Override
+    public void log(String label, String key, String value) {
+        super.log(label, key, value);
+    }
+
+    @Override
+    public void log(String label, String key, String value, long timestamp) {
+        super.log(label, key, value, timestamp);
+    }
+
+    @Override
+    public void log(String label, Map<String, String> data) {
+        super.log(label, data);
+    }
+
+    @Override
+    public void log(String label, Map<String, String> data, long timestamp) {
+        super.log(label, data, timestamp);
     }
 
     @Override
