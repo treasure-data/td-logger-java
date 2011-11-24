@@ -17,16 +17,17 @@
 //
 package com.treasure_data.model;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.Map;
 
 
 public class Database extends Model {
 
     private String name;
 
-    private List<Table> tables;
+    private Map<String, Table> tables;
 
-    public Database(Client client, String name, List<Table> tables) {
+    public Database(Client client, String name, Map<String, Table> tables) {
         super(client);
         this.name = name;
         this.tables = tables;
@@ -36,30 +37,30 @@ public class Database extends Model {
         return name;
     }
 
-    public void delete() {
+    public void delete() throws IOException, APIException {
         getClient().deleteDatabase(name);
     }
 
-    public List<Table> getTables() {
+    public Map<String, Table> getTables() throws IOException, APIException {
         if (tables == null) {
             updateTables();
         }
         return tables;
     }
 
-    public void createLogTable(String tableName) {
+    public void createLogTable(String tableName) throws IOException, APIException {
         getClient().createLogTable(name, tableName);
     }
 
-    public void createItemTable(String tableName) {
+    public void createItemTable(String tableName) throws IOException, APIException {
         getClient().createItemTable(name, tableName);
     }
 
-    public Table getTable(String tableName) throws NotFoundException {
-        return getClient().getTable(name, tableName);
-    }
+//    public Table getTable(String tableName) throws IOException, APIException {
+//        return getClient().getTable(name, tableName);
+//    }
 
-    private void updateTables() {
+    private void updateTables() throws IOException, APIException {
         tables = getClient().getTables(name);
     }
 }

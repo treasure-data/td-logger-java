@@ -32,7 +32,7 @@ public abstract class AbstractClient implements Client {
 
     private Pattern columnPat;
 
-    protected AbstractClient(String apiKey) {
+    protected AbstractClient(final String apiKey) {
         this.apiKey = apiKey;
         databasePat = Pattern.compile("^([a-z0-9_]+)$");
         columnPat = Pattern.compile("^([a-z0-9_]+)$");

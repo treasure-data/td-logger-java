@@ -17,23 +17,55 @@
 //
 package com.treasure_data.model;
 
+import java.io.IOException;
+
 
 public class Table extends Model {
+
+    public static enum Type {
+        LOG, ITEM, UNDEFINED
+    }
+
+    public static Table.Type toType(String typeName) {
+        if (typeName.equals("log")) {
+            return Table.Type.LOG;
+        } else if (typeName.equals("item")) {
+            return Table.Type.ITEM;
+        } else {
+            return Table.Type.UNDEFINED;
+        }
+    }
+
+    public static String toName(Table.Type type) {
+        switch (type) {
+        case LOG:
+            return "log";
+        case ITEM:
+            return "item";
+        default:
+            return "?";
+        }
+    }
 
     private String databaseName;
 
     private String name;
 
-    // TODO #MN type check
-    private String type;
+    private Table.Type type;
 
-    // TODO #MN type check
     private String schema;
 
-    // TODO #MN type check
-    private int count;
+    private long count;
 
-    public Table(Client client, String databaseName, String name, String type, String schema, int count) {
+    public Table(String name, Table.Type type, String schema, long count) {
+        super(null);
+        this.name = name;
+        this.type = type;
+        this.schema = schema;
+        this.count = count;
+    }
+
+    public Table(Client client, String databaseName, String name, Table.Type type, String schema, long count) {
         super(client);
         this.databaseName = databaseName;
         this.name = name;
@@ -42,15 +74,15 @@ public class Table extends Model {
         this.count = count;
     }
 
-    public Database getDatabase() throws NotFoundException {
-        return getClient().getDatabase(databaseName);
+    public String getDatabaseName() throws NotFoundException {
+        return databaseName;
     }
 
     public String ID() {
         return databaseName + "." + name;
     }
 
-    public void delete() {
+    public void delete() throws IOException, APIException {
         getClient().deleteTable(databaseName, name);
     }
 
