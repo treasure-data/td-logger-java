@@ -1,4 +1,5 @@
 .gitignore
+treasure-data.properties
 target
 .project
 .classpath
