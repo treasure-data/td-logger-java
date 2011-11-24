@@ -38,4 +38,13 @@ public interface Config {
 
     String TD_LOGGER_AGENT_BUFCAPACITY_DEFAULT = "1048576"; // 1 * 1024 * 1024
 
+    String TD_LOGGER_API_KEY = "td.logger.api.key";
+
+    String TD_LOGGER_API_SERVER_HOST = "td.logger.api.server.host";
+
+    String TD_LOGGER_API_SERVER_HOST_DEFAULT = "api.treasure-data.com";
+
+    String TD_LOGGER_API_SERVER_PORT = "td.logger.api.server.port";
+
+    String TD_LOGGER_API_SERVER_PORT_DEFAULT = "80";
 }
