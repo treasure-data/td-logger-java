@@ -31,8 +31,10 @@ public class Table extends Model {
             return Table.Type.LOG;
         } else if (typeName.equals("item")) {
             return Table.Type.ITEM;
-        } else {
+        } else if (typeName.equals("?")) {
             return Table.Type.UNDEFINED;
+        } else {
+            return Table.Type.UNDEFINED; // TODO #MN
         }
     }
 
@@ -51,13 +53,13 @@ public class Table extends Model {
 
     private String name;
 
-    private Table.Type type;
+    private Type type;
 
     private String schema;
 
     private long count;
 
-    public Table(String name, Table.Type type, String schema, long count) {
+    public Table(String name, Type type, String schema, long count) {
         super(null);
         this.name = name;
         this.type = type;
@@ -65,7 +67,7 @@ public class Table extends Model {
         this.count = count;
     }
 
-    public Table(Client client, String databaseName, String name, Table.Type type, String schema, long count) {
+    public Table(Client client, String databaseName, String name, Type type, String schema, long count) {
         super(client);
         this.databaseName = databaseName;
         this.name = name;

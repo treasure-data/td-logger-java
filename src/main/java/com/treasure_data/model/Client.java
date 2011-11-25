@@ -17,32 +17,39 @@
 //
 package com.treasure_data.model;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public interface Client {
 
-    String getServerStatus() throws IOException;
+    String getServerStatus() throws APIException;
 
     /** Database operations */
-    List<String> getDatabaseNames() throws IOException, APIException;
+    List<String> getDatabaseNames() throws APIException;
 
-    boolean deleteDatabase(String databaseName) throws IOException, APIException;
+    boolean deleteDatabase(String databaseName) throws APIException;
 
-    boolean createDatabase(String databaseName) throws IOException, APIException;
+    boolean createDatabase(String databaseName) throws  APIException;
 
     /** Table operations */
 
-    Map<String, Table> getTables(String databaseName) throws IOException, APIException;
+    Map<String, Table> getTables(String databaseName) throws APIException;
 
-    boolean createLogTable(String databaseName, String tableName) throws IOException, APIException;
+    boolean createLogTable(String databaseName, String tableName) throws APIException;
 
-    boolean createItemTable(String databaseName, String tableName) throws IOException, APIException;
+    boolean createItemTable(String databaseName, String tableName) throws APIException;
 
-    Table.Type deleteTable(String databaseName, String tableName) throws IOException, APIException;
+    Table.Type deleteTable(String databaseName, String tableName) throws APIException;
 
-    boolean updateSchema();
+    boolean updateSchema() throws APIException;
 
-    // List<?> tail();
+    boolean tail() throws APIException;
+
+    void getJobs() throws APIException;
+
+    void showJob() throws APIException;
+
+    void getJobResult() throws APIException;
+
+    void getJobResultFormat() throws APIException;
 }

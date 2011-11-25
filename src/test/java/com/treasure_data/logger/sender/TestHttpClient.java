@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -54,6 +53,22 @@ public class TestHttpClient {
         HttpClient client = new HttpClient(apiKey);
         Map<String, Table> tables = client.getTables("mugatest");
         System.out.println(tables);
+    }
+
+    @Ignore @Test
+    public void testCreateTable() throws Exception {
+        String apiKey = System.getProperties().getProperty(Config.TD_LOGGER_API_KEY);
+        HttpClient client = new HttpClient(apiKey);
+        client.createLogTable("mugatest", "table4");
+        client.createItemTable("mugatest", "table5");
+    }
+
+    @Ignore @Test
+    public void testDeleteTable() throws Exception {
+        String apiKey = System.getProperties().getProperty(Config.TD_LOGGER_API_KEY);
+        HttpClient client = new HttpClient(apiKey);
+        Table.Type type = client.deleteTable("mugatest", "table4");
+        System.out.println(type);
     }
 
     @Test
