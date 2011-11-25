@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
@@ -41,10 +39,7 @@ import org.slf4j.LoggerFactory;
 import com.treasure_data.logger.Config;
 import com.treasure_data.model.APIException;
 import com.treasure_data.model.AbstractClient;
-import com.treasure_data.model.CannotCreateException;
-import com.treasure_data.model.Database;
 import com.treasure_data.model.Table;
-import com.treasure_data.model.NotFoundException;
 
 public class HttpClient extends AbstractClient {
 
@@ -52,10 +47,6 @@ public class HttpClient extends AbstractClient {
 
     private static final SimpleDateFormat RFC2822FORMAT =
         new SimpleDateFormat( "E, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH );
-
-    public static HttpClient authenticate(String user, String password) {
-        throw new UnsupportedOperationException(); // TODO #MN
-    }
 
     public HttpClient(final String apiKey) {
         super(apiKey);
@@ -266,13 +257,45 @@ public class HttpClient extends AbstractClient {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
+    public void killJob() throws APIException { // TODO #MN
+        throw new UnsupportedOperationException("Not implement yet.");
+    }
+
+    public void doHiveQuery() throws APIException { // TODO #MN
+        throw new UnsupportedOperationException("Not implement yet.");
+    }
+
+    public void createSchedule(String scheduleName) throws APIException { // TODO #MN
+        throw new UnsupportedOperationException("Not implement yet.");
+    }
+
+    public void deleteSchedule(String scheduleName) throws APIException { // TODO #MN
+        throw new UnsupportedOperationException("Not implement yet.");
+    }
+
+    public List getSchedules() throws APIException { // TODO #MN
+        throw new UnsupportedOperationException("Not implement yet.");
+    }
+
+    public void history() throws APIException { // TODO #MN
+        throw new UnsupportedOperationException("Not implement yet.");
+    }
+
+    public void importData() throws APIException { // TODO #MN
+        throw new UnsupportedOperationException("Not implement yet.");
+    }
+
+    public String authenticate(String user, String password) // TODO #MN
+            throws APIException {
+        throw new UnsupportedOperationException("Not implement yet.");
+    }
     public String getServerStatus() throws APIException {
         HttpURLConnection conn = null;
         String jsonData;
         try {
             conn = doGetRequest("/v3/system/server_status", null, null);
             int code = getResponseCode(conn);
-            if (code != HttpURLConnection.HTTP_OK) { // not 200
+            if (code != HttpURLConnection.HTTP_OK) {
                 String msg = String.format("Server is down (%s (%d): %s)",
                         new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
                 LOG.error(msg);

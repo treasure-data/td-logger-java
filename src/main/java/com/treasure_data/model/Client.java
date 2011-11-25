@@ -22,16 +22,14 @@ import java.util.Map;
 
 public interface Client {
 
-    String getServerStatus() throws APIException;
-
-    /** Database operations */
+    /** Database API */
     List<String> getDatabaseNames() throws APIException;
 
     boolean deleteDatabase(String databaseName) throws APIException;
 
     boolean createDatabase(String databaseName) throws  APIException;
 
-    /** Table operations */
+    /** Table API */
 
     Map<String, Table> getTables(String databaseName) throws APIException;
 
@@ -45,6 +43,8 @@ public interface Client {
 
     boolean tail() throws APIException;
 
+    /** Job API */
+
     void getJobs() throws APIException;
 
     void showJob() throws APIException;
@@ -52,4 +52,28 @@ public interface Client {
     void getJobResult() throws APIException;
 
     void getJobResultFormat() throws APIException;
+
+    void killJob() throws APIException;
+
+    void doHiveQuery() throws APIException;
+
+    /** Schedule API */
+
+    void createSchedule(String scheduleName) throws APIException;
+
+    void deleteSchedule(String scheduleName) throws APIException;
+
+    List getSchedules() throws APIException;
+
+    void history() throws APIException;
+
+    /** Import API */
+
+    void importData() throws APIException;
+
+    /** User API */
+
+    String authenticate(String user, String password) throws APIException;
+
+    String getServerStatus() throws APIException;
 }
