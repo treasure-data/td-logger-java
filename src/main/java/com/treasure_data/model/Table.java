@@ -17,10 +17,8 @@
 //
 package com.treasure_data.model;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
 
 public class Table extends Model {
 
@@ -61,6 +59,10 @@ public class Table extends Model {
 
     private long count;
 
+    public Table(Client client, String databaseName, String name) {
+        this(client, databaseName, name, Table.Type.UNDEFINED, 0, null);
+    }
+
     public Table(Client client, String databaseName, String name, Type type,
             long count, List<Map<String, String>> schema) {
         super(client);
@@ -71,16 +73,22 @@ public class Table extends Model {
         this.count = count;
     }
 
-    public String getDatabaseName() throws NotFoundException {
-        return databaseName;
+    @Override
+    public boolean create() throws ClientException {
+        switch (type) {
+        case LOG:
+            return client.createLogTable(databaseName, name);
+        case ITEM:
+            return client.createItemTable(databaseName, name);
+        default:
+            return false; // TODO #MN
+        }
     }
 
-    public String ID() {
-        return databaseName + "." + name;
-    }
-
-    public void delete() throws IOException, ClientException {
-        getClient().deleteTable(databaseName, name);
+    @Override
+    public boolean delete() throws ClientException {
+        client.deleteTable(databaseName, name);
+        return true;
     }
 
     public void tail() {

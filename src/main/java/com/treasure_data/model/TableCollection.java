@@ -1,9 +1,14 @@
 package com.treasure_data.model;
 
-public class DatabaseCollection extends ModelCollection<Database> {
+public class TableCollection extends ModelCollection<Table> {
 
-    public DatabaseCollection(Client client) {
+    private String databaseName;
+
+    private String name;
+
+    public TableCollection(Client client, String databaseName) {
         super(client);
+        this.databaseName = databaseName;
     }
 
     @Override
@@ -11,9 +16,9 @@ public class DatabaseCollection extends ModelCollection<Database> {
         if (models.containsKey(name)) {
             models.get(name).create();
         } else {
-            Database database = new Database(client, name, null);
-            database.create();
-            models.put(name, database);
+            Table table = new Table(client, databaseName, name);
+            table.create();
+            models.put(name, table);
         }
         return true;
     }
@@ -21,8 +26,8 @@ public class DatabaseCollection extends ModelCollection<Database> {
     @Override
     boolean delete(String name) throws ClientException {
         if (models.containsKey(name)) {
-            Database database = models.remove(name);
-            database.delete();
+            Table table = models.remove(name);
+            table.delete();
             return true;
         } else {
             throw new NotFoundException(""); // TODO #MN

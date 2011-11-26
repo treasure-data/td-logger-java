@@ -31,12 +31,9 @@ abstract class ModelCollection<T extends Model> extends Model {
     public boolean create() throws ClientException {
         throw new UnsupportedOperationException();
     }
+
     @Override
     public boolean delete() throws ClientException {
-        throw new UnsupportedOperationException();
-    }
-    @Override
-    public boolean exists() throws ClientException {
         throw new UnsupportedOperationException();
     }
 

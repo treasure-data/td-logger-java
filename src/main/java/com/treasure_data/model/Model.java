@@ -29,5 +29,4 @@ abstract class Model {
 
     abstract boolean delete() throws ClientException;
 
-    abstract boolean exists() throws ClientException;
 }

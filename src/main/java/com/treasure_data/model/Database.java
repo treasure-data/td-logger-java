@@ -19,13 +19,12 @@ package com.treasure_data.model;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 public class Database extends Model {
 
     private String name;
 
-    private List<Table> tables;
+    private List<Table> tables; // TODO #MN table collection
 
     public Database(Client client, String name, List<Table> tables) {
         super(client);
@@ -38,10 +37,6 @@ public class Database extends Model {
     }
 
     public boolean delete() throws ClientException {
-        return client.deleteDatabase(name);
-    }
-
-    public boolean exists() throws ClientException {
         return client.deleteDatabase(name);
     }
 
