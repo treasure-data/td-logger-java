@@ -15,9 +15,10 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-package com.treasure_data.logger.sender;
+package com.treasure_data.client.model;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -37,10 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.treasure_data.logger.Config;
-import com.treasure_data.model.APIException;
-import com.treasure_data.model.AbstractClient;
-import com.treasure_data.model.AuthenticationException;
-import com.treasure_data.model.Table;
 
 public class HttpClient extends AbstractClient {
 
@@ -49,11 +46,43 @@ public class HttpClient extends AbstractClient {
     private static final SimpleDateFormat RFC2822FORMAT =
         new SimpleDateFormat( "E, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH );
 
+    public static HttpClient getClient(String user, String password) throws ClientException {
+        HttpClient client = new HttpClient(null);
+        String apiKey = client.authenticate(user, password);
+        client.setAPIKey(apiKey);
+        return client;
+    }
+
+    public static String stats() throws ClientException {
+        HttpClient client = new HttpClient(null);
+        return client.getServerStatus();
+    }
+
     public HttpClient(final String apiKey) {
         super(apiKey);
     }
 
-    public List<String> getDatabaseNames() throws APIException {
+    public List<Database> getDatabases() throws ClientException {
+        List<String> dbNames = getDatabaseNames();
+        List<Database> databases = new ArrayList<Database>(dbNames.size());
+        for (String dbName : dbNames) {
+            databases.add(new Database(this, dbName, null));
+        }
+        return databases;
+    }
+
+    public Database getDatabase(String name) throws ClientException {
+        List<String> dbNames = getDatabaseNames();
+        for (String dbName : dbNames) {
+            if (dbName.equals(name)) {
+                return new Database(this, dbName, null);
+            }
+        }
+        throw new NotFoundException(
+                String.format("Database %s does not exist", new Object[] { name }));
+    }
+
+    private List<String> getDatabaseNames() throws ClientException {
         HttpURLConnection conn = null;
         String jsonData;
         try {
@@ -63,11 +92,11 @@ public class HttpClient extends AbstractClient {
                 String msg = String.format("List databases failed (%s (%d): %s)",
                         new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
                 LOG.error(msg);
-                throw new APIException(msg);
+                throw new ClientException(msg);
             }
             jsonData = getResponseBody(conn); // TODO #MN format check
         } catch (IOException e) {
-            throw new APIException(e);
+            throw new ClientException(e);
         } finally {
             if (conn != null) {
                 disconnect(conn);
@@ -82,15 +111,13 @@ public class HttpClient extends AbstractClient {
         List<String> dbNames = new ArrayList<String>();
         while (dbNameMapIter.hasNext()) {
             Map<String, String> dbNameMap = dbNameMapIter.next();
-            String dbName = dbNameMap.get("name");
-            if (!dbNames.contains(dbName)) {
-                dbNames.add(dbName);
-            }
+            String name = dbNameMap.get("name");
+            dbNames.add(name);
         }
         return dbNames;
     }
 
-    public boolean deleteDatabase(String name) throws APIException {
+    public boolean deleteDatabase(String name) throws ClientException {
         HttpURLConnection conn = null;
         try {
             String path = String.format("/v3/database/delete/%s", new Object[] { name });
@@ -100,10 +127,10 @@ public class HttpClient extends AbstractClient {
                 String msg = String.format("Delete database failed (%s (%d): %s)",
                         new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
                 LOG.error(msg);
-                throw new APIException(msg);
+                throw new ClientException(msg);
             }
         } catch (IOException e) {
-            throw new APIException(e);
+            throw new ClientException(e);
         } finally {
             if (conn != null) {
                 disconnect(conn);
@@ -112,20 +139,20 @@ public class HttpClient extends AbstractClient {
         return true;
     }
 
-    public boolean createDatabase(String name) throws APIException {
+    public boolean createDatabase(String databaseName) throws ClientException {
         HttpURLConnection conn = null;
         try {
-            String path = String.format("/v3/database/create/%s", new Object[] { name });
+            String path = String.format("/v3/database/create/%s", new Object[] { databaseName });
             conn = doPostRequest(path, null, null);
             int code = getResponseCode(conn);
             if (code != HttpURLConnection.HTTP_OK) {
                 String msg = String.format("Create database failed (%s (%d): %s)",
                         new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
                 LOG.error(msg);
-                throw new APIException(msg);
+                throw new ClientException(msg);
             }
         } catch (IOException e) {
-            throw new APIException(e);
+            throw new ClientException(e);
         } finally {
             if (conn != null) {
                 disconnect(conn);
@@ -134,56 +161,89 @@ public class HttpClient extends AbstractClient {
         return true;
     }
 
-    public Map<String, Table> getTables(String name) throws APIException {
+    public List<Table> getTables(String databaseName) throws ClientException {
+        @SuppressWarnings("rawtypes")
+        Map map = getTableInfos(databaseName);
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        Iterator<Map> tableIter = ((List) map.get("tables")).iterator();
+        List<Table> tables = new ArrayList<Table>();
+        while (tableIter.hasNext()) {
+            @SuppressWarnings("rawtypes")
+            Map tableMap = tableIter.next();
+            String tableName = (String) tableMap.get("name");
+            String typeName = (String) tableMap.get("type");
+            long count = (Long) tableMap.get("count");
+            List<Map<String, String>> schema = (List<Map<String, String>>)
+                    JSONValue.parse((String) tableMap.get("schema"));
+            System.out.println(schema);
+            Table table = new Table(this, databaseName, tableName, Table.toType(typeName), count, schema);
+            tables.add(table);
+        }
+        return tables;
+    }
+
+    public Table getTable(String databaseName, String tableName) throws ClientException {
+        @SuppressWarnings("rawtypes")
+        Map map = getTableInfos(databaseName);
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        Iterator<Map> tableIter = ((List) map.get("tables")).iterator();
+        List<Table> tables = new ArrayList<Table>();
+        while (tableIter.hasNext()) {
+            @SuppressWarnings("rawtypes")
+            Map tableMap = tableIter.next();
+            String tblName = (String) tableMap.get("name");
+            if (!tblName.equals(tableName)) {
+                continue;
+            }
+            String typeName = (String) tableMap.get("type");
+            long count = (Long) tableMap.get("count");
+            List<Map<String, String>> schema = (List<Map<String, String>>)
+                    JSONValue.parse((String) tableMap.get("schema"));
+            System.out.println(schema);
+            return new Table(this, databaseName, tableName, Table.toType(typeName), count, schema);
+        }
+        throw new NotFoundException(String.format("Table '%s.%s' does not exist",
+                new Object[] { databaseName, tableName }));
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Map getTableInfos(String databaseName) throws ClientException {
         HttpURLConnection conn = null;
         String jsonData;
         try {
-            String path = String.format("/v3/table/list/%s", new Object[] { name });
+            String path = String.format("/v3/table/list/%s", new Object[] { databaseName });
             conn = doGetRequest(path, null, null);
             int code = getResponseCode(conn);
             if (code != HttpURLConnection.HTTP_OK) {
                 String msg = String.format("List tables failed (%s (%d): %s)",
                         new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
                 LOG.error(msg);
-                throw new APIException(msg);
+                throw new ClientException(msg);
             }
             jsonData = getResponseBody(conn); // TODO #MN format check
         } catch (IOException e) {
-            throw new APIException(e);
+            throw new ClientException(e);
         } finally {
             if (conn != null) {
                 disconnect(conn);
             }
         }
 
-        @SuppressWarnings("rawtypes")
-        Map map = (Map) JSONValue.parse(jsonData);
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        Iterator<Map> tableIter = ((List) map.get("tables")).iterator();
-        Map<String, Table> tables = new HashMap<String, Table>();
-        while (tableIter.hasNext()) {
-            @SuppressWarnings("rawtypes")
-            Map tableMap = tableIter.next();
-            String tableName = (String) tableMap.get("name");
-            String typeName = (String) tableMap.get("type");
-            String schema = (String) tableMap.get("schema");
-            long count = (Long) tableMap.get("count");
-            Table table = new Table(tableName, Table.toType(typeName), schema, count);
-            tables.put(tableName, table);
-        }
-        return tables;
+        return (Map) JSONValue.parse(jsonData);
     }
 
-    public boolean createLogTable(String databaseName, String name) throws APIException {
+    public boolean createLogTable(String databaseName, String name) throws ClientException {
         return createTable(databaseName, name, Table.Type.LOG);
     }
 
-    public boolean createItemTable(String databaseName, String name) throws APIException {
+    public boolean createItemTable(String databaseName, String name) throws ClientException {
         return createTable(databaseName, name, Table.Type.ITEM);
     }
 
     private boolean createTable(String databaseName, String name, Table.Type type)
-            throws APIException {
+            throws ClientException {
         HttpURLConnection conn = null;
         try {
             String path = String.format("/v3/table/create/%s/%s/%s",
@@ -194,10 +254,10 @@ public class HttpClient extends AbstractClient {
                 String msg = String.format("Create table failed (%s (%d): %s)",
                         new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
                 LOG.error(msg);
-                throw new APIException(msg);
+                throw new ClientException(msg);
             }
         } catch (IOException e) {
-            throw new APIException(e);
+            throw new ClientException(e);
         } finally {
             if (conn != null) {
                 disconnect(conn);
@@ -206,11 +266,33 @@ public class HttpClient extends AbstractClient {
         return true;
     }
 
-    public boolean updateSchema() throws APIException { // TODO #MN
-        throw new UnsupportedOperationException("Not implement yet.");
+    public boolean updateSchema(String databaseName, String tableName, List<List<String>> schema)
+            throws ClientException {
+        HttpURLConnection conn = null;
+        try {
+            String path = String.format("/v3/table/update-schema/%s/%s",
+                    new Object[] { databaseName, tableName });
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("schema", JSONValue.toJSONString(schema));
+            conn = doPostRequest(path, null, params);
+            int code = getResponseCode(conn);
+            if (code != HttpURLConnection.HTTP_OK) { // not 200
+                String msg = String.format("Create schema table failed (%s (%d): %s)",
+                        new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
+                LOG.error(msg);
+                throw new ClientException(msg);
+            }
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                disconnect(conn);
+            }
+        }
+        return true;
     }
 
-    public Table.Type deleteTable(String databaseName, String name) throws APIException {
+    public Table.Type deleteTable(String databaseName, String name) throws ClientException {
         HttpURLConnection conn = null;
         String jsonData;
         try {
@@ -221,11 +303,11 @@ public class HttpClient extends AbstractClient {
                 String msg = String.format("Drop table failed (%s (%d): %s)",
                         new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
                 LOG.error(msg);
-                throw new APIException(msg);
+                throw new ClientException(msg);
             }
             jsonData = getResponseBody(conn); // TODO #MN check format
         } catch (IOException e) {
-            throw new APIException(e);
+            throw new ClientException(e);
         } finally {
             if (conn != null) {
                 disconnect(conn);
@@ -237,55 +319,55 @@ public class HttpClient extends AbstractClient {
         return Table.toType((String) map.get("type"));
     }
 
-    public boolean tail() throws APIException { // TODO #MN
+    public boolean tail() throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void getJobs() throws APIException { // TODO #MN
+    public void getJobs() throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void showJob() throws APIException { // TODO #MN
+    public void showJob() throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void getJobResult() throws APIException { // TODO #MN
+    public void getJobResult() throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void getJobResultFormat() throws APIException { // TODO #MN
+    public void getJobResultFormat() throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void killJob() throws APIException { // TODO #MN
+    public void killJob() throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void doHiveQuery() throws APIException { // TODO #MN
+    public void doHiveQuery() throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void createSchedule(String scheduleName) throws APIException { // TODO #MN
+    public void createSchedule(String scheduleName) throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void deleteSchedule(String scheduleName) throws APIException { // TODO #MN
+    public void deleteSchedule(String scheduleName) throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public List getSchedules() throws APIException { // TODO #MN
+    public List getSchedules() throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void history() throws APIException { // TODO #MN
+    public void history() throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void importData() throws APIException { // TODO #MN
+    public void importData() throws ClientException { // TODO #MN
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public String authenticate(String user, String password) throws APIException {
+    public String authenticate(String user, String password) throws ClientException {
         HttpURLConnection conn = null;
         String jsonData;
         try {
@@ -302,12 +384,12 @@ public class HttpClient extends AbstractClient {
                 if (code == HttpURLConnection.HTTP_BAD_REQUEST) {
                     throw new AuthenticationException(msg);
                 } else {
-                    throw new APIException(msg);
+                    throw new ClientException(msg);
                 }
             }
             jsonData = getResponseBody(conn); // TODO #MN check format
         } catch (IOException e) {
-            throw new APIException(e);
+            throw new ClientException(e);
         } finally {
             if (conn != null) {
                 disconnect(conn);
@@ -318,7 +400,7 @@ public class HttpClient extends AbstractClient {
         Map map = (Map) JSONValue.parse(jsonData);
         return (String) map.get("apikey");
     }
-    public String getServerStatus() throws APIException {
+    public String getServerStatus() throws ClientException {
         HttpURLConnection conn = null;
         String jsonData;
         try {
@@ -332,7 +414,7 @@ public class HttpClient extends AbstractClient {
             }
             jsonData = getResponseBody(conn);
         } catch (IOException e) {
-            throw new APIException(e);
+            throw new ClientException(e);
         } finally {
             if (conn != null) {
                 disconnect(conn);
@@ -436,8 +518,50 @@ public class HttpClient extends AbstractClient {
         return conn;
     }
 
-    private HttpURLConnection doPutRequest(String path, Map<String, String> params) throws IOException {
-        throw new UnsupportedOperationException(); // TODO #MN must implement it soon
+    private HttpURLConnection doPutRequest(String path,
+            Map<String, String> header, Map<String, String> params) throws IOException {
+        Properties props = System.getProperties();
+        String host = props.getProperty(
+                Config.TD_LOGGER_API_SERVER_HOST, Config.TD_LOGGER_API_SERVER_HOST_DEFAULT);
+        int port = Integer.parseInt(props.getProperty(
+                Config.TD_LOGGER_API_SERVER_PORT, Config.TD_LOGGER_API_SERVER_PORT_DEFAULT));
+
+        HttpURLConnection conn;
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("http://").append(host).append(":").append(port).append(path);
+
+        if (params != null && !params.isEmpty()) { // parameters
+            sbuf.append("?");
+            int paramSize = params.size();
+            Iterator<Map.Entry<String, String>> iter = params.entrySet().iterator();
+            for (int i = 0; i < paramSize; ++i) {
+                Map.Entry<String, String> e = iter.next();
+                sbuf.append(e.getKey()).append("=").append(e.getValue());
+                if (i + 1 != paramSize) {
+                    sbuf.append("&");
+                }
+            }
+            URL url = new URL(sbuf.toString());
+            conn = (HttpURLConnection) url.openConnection();
+        } else {
+            URL url = new URL(sbuf.toString());
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestProperty("Content-Length", "0");
+        }
+
+        // header
+        conn.setRequestMethod("PUT");
+        if (getAPIKey() != null) {
+            conn.setRequestProperty("Authorization", "TD1 " + getAPIKey());
+        }
+        conn.setRequestProperty("Date", toRFC2822Format(new Date()));
+        if (header != null && !header.isEmpty()) {
+            for (Map.Entry<String, String> e : header.entrySet()) {
+                conn.setRequestProperty(e.getKey(), e.getValue());
+            }
+        }
+        conn.connect();
+        return conn;
     }
 
     private int getResponseCode(HttpURLConnection conn) throws IOException {

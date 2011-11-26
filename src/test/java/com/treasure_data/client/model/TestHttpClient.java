@@ -1,11 +1,10 @@
-package com.treasure_data.logger.sender;
+package com.treasure_data.client.model;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -14,8 +13,9 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.treasure_data.client.model.HttpClient;
+import com.treasure_data.client.model.Table;
 import com.treasure_data.logger.Config;
-import com.treasure_data.model.Table;
 
 public class TestHttpClient {
 
@@ -29,8 +29,8 @@ public class TestHttpClient {
     public void testGetDatabaseNames() throws Exception {
         String apiKey = System.getProperties().getProperty(Config.TD_LOGGER_API_KEY);
         HttpClient client = new HttpClient(apiKey);
-        List<String> databaseNames = client.getDatabaseNames();
-        System.out.println(databaseNames);
+        List<Database> databases = client.getDatabases();
+        System.out.println(databases);
     }
 
     @Ignore @Test
@@ -38,6 +38,7 @@ public class TestHttpClient {
         String apiKey = System.getProperties().getProperty(Config.TD_LOGGER_API_KEY);
         HttpClient client = new HttpClient(apiKey);
         boolean deleted = client.deleteDatabase("mugatest");
+        System.out.println(deleted);
     }
 
     @Ignore @Test
@@ -45,14 +46,32 @@ public class TestHttpClient {
         String apiKey = System.getProperties().getProperty(Config.TD_LOGGER_API_KEY);
         HttpClient client = new HttpClient(apiKey);
         boolean deleted = client.createDatabase("mugatest");
+        System.out.println(deleted);
     }
 
     @Ignore @Test
     public void testGetTables() throws Exception {
         String apiKey = System.getProperties().getProperty(Config.TD_LOGGER_API_KEY);
         HttpClient client = new HttpClient(apiKey);
-        Map<String, Table> tables = client.getTables("mugatest");
+        List<Table> tables = client.getTables("sf");
         System.out.println(tables);
+    }
+
+    @Ignore @Test
+    public void testUpdateSchema() throws Exception {
+        String apiKey = System.getProperties().getProperty(Config.TD_LOGGER_API_KEY);
+        HttpClient client = new HttpClient(apiKey);
+        List<List<String>> schema = new ArrayList<List<String>>();
+        List<String> s1 = new ArrayList<String>();
+        s1.add("arg1");
+        s1.add("int");
+        schema.add(s1);
+        List<String> s2 = new ArrayList<String>();
+        s2.add("arg2");
+        s2.add("string");
+        schema.add(s2);
+        boolean updated = client.updateSchema("mugatest", "table1", schema);
+        System.out.println(updated);
     }
 
     @Ignore @Test
@@ -71,7 +90,7 @@ public class TestHttpClient {
         System.out.println(type);
     }
 
-    @Test
+    @Ignore @Test
     public void testGetServerStatus() throws Exception {
         HttpClient c = new HttpClient(null);
         assertEquals("ok", c.getServerStatus());

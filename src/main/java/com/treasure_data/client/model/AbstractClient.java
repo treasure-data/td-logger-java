@@ -15,7 +15,7 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-package com.treasure_data.model;
+package com.treasure_data.client.model;
 
 import java.util.regex.Pattern;
 
@@ -40,6 +40,10 @@ public abstract class AbstractClient implements Client {
 
     public String getAPIKey() {
         return apiKey;
+    }
+
+    protected void setAPIKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 
     public boolean validateDatabaseName(String name) {

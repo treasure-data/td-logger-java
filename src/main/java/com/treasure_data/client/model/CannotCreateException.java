@@ -15,21 +15,21 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-package com.treasure_data.model;
+package com.treasure_data.client.model;
 
-public class AuthenticationException extends APIException {
+public class CannotCreateException extends ClientException {
 
     private static final long serialVersionUID = 1L;
 
-    public AuthenticationException(Throwable cause) {
+    public CannotCreateException(String reason) {
+        super(reason);
+    }
+
+    public CannotCreateException(Throwable cause) {
         super(cause);
     }
 
-    public AuthenticationException(String reason, Throwable cause) {
+    public CannotCreateException(String reason, Throwable cause) {
         super(reason, cause);
-    }
-
-    public AuthenticationException(String reason) {
-        super(reason);
     }
 }

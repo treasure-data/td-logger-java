@@ -15,9 +15,11 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-package com.treasure_data.model;
+package com.treasure_data.client.model;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 
 public class Table extends Model {
@@ -55,19 +57,12 @@ public class Table extends Model {
 
     private Type type;
 
-    private String schema;
+    private List<Map<String, String>> schema;
 
     private long count;
 
-    public Table(String name, Type type, String schema, long count) {
-        super(null);
-        this.name = name;
-        this.type = type;
-        this.schema = schema;
-        this.count = count;
-    }
-
-    public Table(Client client, String databaseName, String name, Type type, String schema, long count) {
+    public Table(Client client, String databaseName, String name, Type type,
+            long count, List<Map<String, String>> schema) {
         super(client);
         this.databaseName = databaseName;
         this.name = name;
@@ -84,7 +79,7 @@ public class Table extends Model {
         return databaseName + "." + name;
     }
 
-    public void delete() throws IOException, APIException {
+    public void delete() throws IOException, ClientException {
         getClient().deleteTable(databaseName, name);
     }
 

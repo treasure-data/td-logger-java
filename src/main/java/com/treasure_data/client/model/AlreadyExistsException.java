@@ -15,21 +15,21 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-package com.treasure_data.model;
+package com.treasure_data.client.model;
 
-public class NotFoundException extends APIException {
+public class AlreadyExistsException extends CannotCreateException {
 
     private static final long serialVersionUID = 1L;
 
-    public NotFoundException(Throwable cause) {
+    public AlreadyExistsException(Throwable cause) {
         super(cause);
     }
 
-    public NotFoundException(String reason) {
+    public AlreadyExistsException(String reason) {
         super(reason);
     }
 
-    public NotFoundException(String reason, Throwable cause) {
+    public AlreadyExistsException(String reason,Throwable cause) {
         super(reason, cause);
     }
 }

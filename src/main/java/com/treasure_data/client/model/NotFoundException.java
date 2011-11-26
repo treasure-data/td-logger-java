@@ -15,21 +15,21 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-package com.treasure_data.model;
+package com.treasure_data.client.model;
 
-public class APIException extends Exception {
+public class NotFoundException extends ClientException {
 
     private static final long serialVersionUID = 1L;
 
-    public APIException(Throwable cause) {
+    public NotFoundException(Throwable cause) {
         super(cause);
     }
 
-    public APIException(String reason, Throwable cause) {
-        super(reason, cause);
+    public NotFoundException(String reason) {
+        super(reason);
     }
 
-    public APIException(String reason) {
-        super(reason);
+    public NotFoundException(String reason, Throwable cause) {
+        super(reason, cause);
     }
 }
