@@ -15,17 +15,21 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-package com.treasure_data.client.model;
+package com.treasure_data.model;
 
-abstract class Model {
+public class ClientException extends Exception {
 
-    private Client client;
+    private static final long serialVersionUID = 1L;
 
-    public Model(Client client) {
-        this.client = client;
+    public ClientException(Throwable cause) {
+        super(cause);
     }
 
-    public Client getClient() {
-        return client;
+    public ClientException(String reason, Throwable cause) {
+        super(reason, cause);
+    }
+
+    public ClientException(String reason) {
+        super(reason);
     }
 }

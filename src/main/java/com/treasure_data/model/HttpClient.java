@@ -15,10 +15,9 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-package com.treasure_data.client.model;
+package com.treasure_data.model;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -161,15 +160,13 @@ public class HttpClient extends AbstractClient {
         return true;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public List<Table> getTables(String databaseName) throws ClientException {
-        @SuppressWarnings("rawtypes")
         Map map = getTableInfos(databaseName);
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
         Iterator<Map> tableIter = ((List) map.get("tables")).iterator();
         List<Table> tables = new ArrayList<Table>();
         while (tableIter.hasNext()) {
-            @SuppressWarnings("rawtypes")
             Map tableMap = tableIter.next();
             String tableName = (String) tableMap.get("name");
             String typeName = (String) tableMap.get("type");
@@ -183,15 +180,12 @@ public class HttpClient extends AbstractClient {
         return tables;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Table getTable(String databaseName, String tableName) throws ClientException {
-        @SuppressWarnings("rawtypes")
         Map map = getTableInfos(databaseName);
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
         Iterator<Map> tableIter = ((List) map.get("tables")).iterator();
-        List<Table> tables = new ArrayList<Table>();
         while (tableIter.hasNext()) {
-            @SuppressWarnings("rawtypes")
             Map tableMap = tableIter.next();
             String tblName = (String) tableMap.get("name");
             if (!tblName.equals(tableName)) {
@@ -586,7 +580,7 @@ public class HttpClient extends AbstractClient {
         return sbuf.toString();
     }
 
-    private void disconnect(HttpURLConnection conn) { // TODO #MN connections are disconnected every time?
+    private void disconnect(HttpURLConnection conn) {
         conn.disconnect();
     }
 

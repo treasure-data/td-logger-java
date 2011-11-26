@@ -1,4 +1,4 @@
-package com.treasure_data.client.model;
+package com.treasure_data.model;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,9 +13,10 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.treasure_data.client.model.HttpClient;
-import com.treasure_data.client.model.Table;
 import com.treasure_data.logger.Config;
+import com.treasure_data.model.Database;
+import com.treasure_data.model.HttpClient;
+import com.treasure_data.model.Table;
 
 public class TestHttpClient {
 

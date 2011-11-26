@@ -15,21 +15,21 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-package com.treasure_data.client.model;
+package com.treasure_data.model;
 
-public class AuthenticationException extends ClientException {
+public class AlreadyExistsException extends CannotCreateException {
 
     private static final long serialVersionUID = 1L;
 
-    public AuthenticationException(Throwable cause) {
+    public AlreadyExistsException(Throwable cause) {
         super(cause);
     }
 
-    public AuthenticationException(String reason, Throwable cause) {
-        super(reason, cause);
+    public AlreadyExistsException(String reason) {
+        super(reason);
     }
 
-    public AuthenticationException(String reason) {
-        super(reason);
+    public AlreadyExistsException(String reason,Throwable cause) {
+        super(reason, cause);
     }
 }

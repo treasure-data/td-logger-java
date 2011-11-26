@@ -18,49 +18,59 @@
 package com.treasure_data.model;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
-
 
 public class Database extends Model {
 
     private String name;
 
-    private Map<String, Table> tables;
+    private List<Table> tables;
 
-    public Database(Client client, String name, Map<String, Table> tables) {
+    public Database(Client client, String name, List<Table> tables) {
         super(client);
         this.name = name;
         this.tables = tables;
     }
 
-    public String getName() {
-        return name;
+    public boolean create() throws ClientException {
+        return client.createDatabase(name);
     }
 
-    public void delete() throws IOException, APIException {
-        getClient().deleteDatabase(name);
+    public boolean delete() throws ClientException {
+        return client.deleteDatabase(name);
     }
 
-    public Map<String, Table> getTables() throws IOException, APIException {
+    public boolean exists() throws ClientException {
+        return client.deleteDatabase(name);
+    }
+
+    public List<Table> getTables() throws IOException, ClientException {
         if (tables == null) {
             updateTables();
         }
         return tables;
     }
 
-    public void createLogTable(String tableName) throws IOException, APIException {
-        getClient().createLogTable(name, tableName);
-    }
-
-    public void createItemTable(String tableName) throws IOException, APIException {
-        getClient().createItemTable(name, tableName);
-    }
-
 //    public Table getTable(String tableName) throws IOException, APIException {
 //        return getClient().getTable(name, tableName);
 //    }
 
-    private void updateTables() throws IOException, APIException {
-        tables = getClient().getTables(name);
+    private void updateTables() throws IOException, ClientException {
+        tables = client.getTables(name);
+    }
+
+    public boolean createLogTable(String tableName) throws IOException, ClientException {
+        return client.createLogTable(name, tableName);
+    }
+
+    public boolean createItemTable(String tableName) throws IOException, ClientException {
+        return client.createItemTable(name, tableName);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Database{name=%s,tables=%s}",
+                new Object[] { name, tables == null ? "{}" : tables.toString() });
     }
 }

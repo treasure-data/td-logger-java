@@ -15,21 +15,19 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-package com.treasure_data.client.model;
+package com.treasure_data.model;
 
-public class CannotCreateException extends ClientException {
+abstract class Model {
 
-    private static final long serialVersionUID = 1L;
+    protected Client client;
 
-    public CannotCreateException(String reason) {
-        super(reason);
+    public Model(Client client) {
+        this.client = client;
     }
 
-    public CannotCreateException(Throwable cause) {
-        super(cause);
-    }
+    abstract boolean create() throws ClientException;
 
-    public CannotCreateException(String reason, Throwable cause) {
-        super(reason, cause);
-    }
+    abstract boolean delete() throws ClientException;
+
+    abstract boolean exists() throws ClientException;
 }
