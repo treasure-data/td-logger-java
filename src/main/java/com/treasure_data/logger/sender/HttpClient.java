@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import com.treasure_data.logger.Config;
 import com.treasure_data.model.APIException;
 import com.treasure_data.model.AbstractClient;
+import com.treasure_data.model.AuthenticationException;
 import com.treasure_data.model.Table;
 
 public class HttpClient extends AbstractClient {
@@ -213,8 +214,7 @@ public class HttpClient extends AbstractClient {
         HttpURLConnection conn = null;
         String jsonData;
         try {
-            String path = String.format("/v3/table/delete/%s/%s",
-                    new Object[] { databaseName, name });
+            String path = String.format("/v3/table/delete/%s/%s", new Object[] { databaseName, name });
             conn = doPostRequest(path, null, null);
             int code = getResponseCode(conn);
             if (code != HttpURLConnection.HTTP_OK) { // not 200
@@ -285,9 +285,38 @@ public class HttpClient extends AbstractClient {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public String authenticate(String user, String password) // TODO #MN
-            throws APIException {
-        throw new UnsupportedOperationException("Not implement yet.");
+    public String authenticate(String user, String password) throws APIException {
+        HttpURLConnection conn = null;
+        String jsonData;
+        try {
+            String path = "/v3/user/authenticate";
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("user", user);
+            params.put("password", password);
+            conn = doPostRequest(path, null, params);
+            int code = getResponseCode(conn);
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Authentication failed (%s (%d): %s)",
+                        new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
+                LOG.error(msg);
+                if (code == HttpURLConnection.HTTP_BAD_REQUEST) {
+                    throw new AuthenticationException(msg);
+                } else {
+                    throw new APIException(msg);
+                }
+            }
+            jsonData = getResponseBody(conn); // TODO #MN check format
+        } catch (IOException e) {
+            throw new APIException(e);
+        } finally {
+            if (conn != null) {
+                disconnect(conn);
+            }
+        }
+
+        @SuppressWarnings("rawtypes")
+        Map map = (Map) JSONValue.parse(jsonData);
+        return (String) map.get("apikey");
     }
     public String getServerStatus() throws APIException {
         HttpURLConnection conn = null;
