@@ -28,7 +28,7 @@ public abstract class AbstractClient implements Client {
 
     private String apiKey;
 
-    private Pattern databasePat;
+    private static Pattern databasePat;
 
     private Pattern columnPat;
 
@@ -46,7 +46,7 @@ public abstract class AbstractClient implements Client {
         this.apiKey = apiKey;
     }
 
-    public boolean validateDatabaseName(String name) {
+    public static boolean validateDatabaseName(String name) {
         if (name == null || name.equals("")) {
             LOG.info(String.format("Empty name is not allowed: %s",
                     new Object[] { name }));
@@ -68,7 +68,7 @@ public abstract class AbstractClient implements Client {
         return true;
     }
 
-    public boolean validateTableName(String name) {
+    public static boolean validateTableName(String name) {
         return validateDatabaseName(name);
     }
 
