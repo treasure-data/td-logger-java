@@ -27,6 +27,8 @@ import org.fluentd.logger.sender.Sender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.treasure_data.logger.sender.HttpSender;
+
 public class TreasureDataLogger extends FluentLogger {
 
     private static Logger LOG = LoggerFactory.getLogger(TreasureDataLogger.class);
@@ -44,13 +46,24 @@ public class TreasureDataLogger extends FluentLogger {
                     "Cannot specify null or null charactor as value of database");
         }
 
-        String host;
-        int port, timeout, bufferCapacity;
+        String key, host, apiKey = null;
+        int port, timeout = 0, bufferCapacity = 0;
         boolean agentMode = Boolean.parseBoolean(props.getProperty(
                 Config.TD_LOGGER_AGENTMODE, Config.TD_LOGGER_AGENTMODE_DEFAULT));
 
         if (!agentMode) {
-            throw new UnsupportedOperationException();// TODO #MN must implement it soon
+            apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
+            if (apiKey == null) {
+                throw new IllegalArgumentException(
+                        String.format("APIKey option is required as java property: %s",
+                                new Object[] { Config.TD_LOGGER_API_KEY }));
+            }
+            // TODO #MN auto create table
+            host = props.getProperty(
+                    Config.TD_LOGGER_API_SERVER_HOST, Config.TD_LOGGER_API_SERVER_HOST_DEFAULT);
+            port = Integer.parseInt(props.getProperty(
+                    Config.TD_LOGGER_API_SERVER_PORT, Config.TD_LOGGER_API_SERVER_PORT_DEFAULT));
+            key = String.format("%s_%s_%s_%d", new Object[] { database, apiKey, host, port });
         } else {
             host = props.getProperty(
                     Config.TD_LOGGER_AGENT_HOST, Config.TD_LOGGER_AGENT_HOST_DEFAULT);
@@ -60,20 +73,22 @@ public class TreasureDataLogger extends FluentLogger {
                     Config.TD_LOGGER_AGENT_TIMEOUT, Config.TD_LOGGER_AGENT_TIMEOUT_DEFAULT));
             bufferCapacity = Integer.parseInt(props.getProperty(
                     Config.TD_LOGGER_AGENT_BUFCAPACITY, Config.TD_LOGGER_AGENT_BUFCAPACITY_DEFAULT));
+            key = String.format("%s_%s_%d_%d_%d",
+                    new Object[] { database, host, port, timeout, bufferCapacity });
         }
 
-        String key = String.format("%s_%s_%d_%d_%d",
-                new Object[] { database, host, port, timeout, bufferCapacity });
         if (loggers.containsKey(key)) {
             return loggers.get(key);
         } else {
             // create logger object
             LOG.info(String.format("Creates logger(%s)", new Object[] { key }));
             TreasureDataLogger logger;
-            if (!agentMode) { // connected to TD platform directly
-                throw new UnsupportedOperationException();// TODO #MN must implement it soon
-                //logger = new TreasureDataLogger(database, new HttpSender());
-            } else { // agent mode is connected to specified fluentd
+            if (!agentMode) {
+                // connected to TD platform directly
+                logger = new TreasureDataLogger(database,
+                        new HttpSender(apiKey, host, port));
+            } else {
+                // agent mode is connected to specified fluentd
                 logger = new TreasureDataLogger(database,
                         new RawSocketSender(host, port, timeout, bufferCapacity));
             }
