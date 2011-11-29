@@ -19,13 +19,16 @@ package com.treasure_data.logger.sender;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
-import org.fluentd.logger.sender.Event;
 import org.fluentd.logger.sender.Sender;
 import org.msgpack.MessagePack;
-import org.msgpack.template.Templates;
+import org.msgpack.packer.BufferPacker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.treasure_data.model.HttpClient;
 
 public class HttpSender implements Sender {
 
@@ -33,8 +36,23 @@ public class HttpSender implements Sender {
 
     private MessagePack msgpack;
 
-    public HttpSender() {
+    private Map<String, BufferPacker> chunks;
+
+    private int chunkLimit = 8 * 1024 * 1024; // 8MB
+
+    private LinkedBlockingQueue<QueueEvent> queue;
+
+    private HttpSenderThread senderThread;
+
+    public HttpSender(final String apiKey, final String host, final int port) {
+        if (apiKey == null) {
+            throw new IllegalArgumentException("APIKey is required");
+        }
         msgpack = new MessagePack();
+        chunks = new ConcurrentHashMap<String, BufferPacker>();
+        queue = new LinkedBlockingQueue<QueueEvent>();
+        senderThread = new HttpSenderThread(queue, new HttpClient(apiKey));
+        new Thread(senderThread).start();
     }
 
     public void emit(String tag, Map<String, String> data) {
@@ -42,38 +60,52 @@ public class HttpSender implements Sender {
     }
 
     public void emit(String tag, long timestamp, Map<String, String> data) {
-        if (LOG.isDebugEnabled()) { // for debug
+        if (LOG.isDebugEnabled()) {
             LOG.debug(String.format("Emit event{tag=%s,ts=%d,data=%s}",
                     new Object[] { tag, timestamp, data.toString() }));
         }
+        //data.put("time", timestamp); // TODO #MN must fix
 
         String[] splited = tag.split(".");
-        String database = splited[splited.length - 2];
-        String table = splited[splited.length - 1];
+        String databaseName = splited[splited.length - 2];
+        String tableName = splited[splited.length - 1];
 
         // validation
-//        begin
-//          TreasureData::API.validate_database_name(db)
-//        rescue
-//          @logger.error "TreasureDataLogger: Invalid database name #{db.inspect}: #{$!}"
-//          raise "Invalid database name #{db.inspect}: #{$!}"
-//        end
-//        begin
-//          TreasureData::API.validate_table_name(table)
-//        rescue
-//          @logger.error "TreasureDataLogger: Invalid table name #{table.inspect}: #{$!}"
-//          raise "Invalid table name #{table.inspect}: #{$!}"
-//        end
-
-        byte[] bytes = null;
-        try {
-            // serialize tag, timestamp and data
-            bytes = msgpack.write(data, Templates.tMap(Templates.TString, Templates.TString));
-        } catch (IOException e) {
-            LOG.error("Cannot serialize data: " + data, e);
+        if (!HttpClient.validateDatabaseName(databaseName)) {
+            String msg = String.format("Invalid database name %s", new Object[] { databaseName });
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+        if (!HttpClient.validateTableName(tableName)) {
+            String msg = String.format("Invalid table name %s", new Object[] { tableName });
+            LOG.error(msg);
+            throw new IllegalArgumentException(msg);
         }
 
+        String key = databaseName + "." + tableName;
+        BufferPacker packer;
+        if (!chunks.containsKey(key)) {
+            packer = msgpack.createBufferPacker(4096);
+            chunks.put(key, packer);
+        } else {
+            packer = chunks.get(key);
+        }
 
+        // write data to chunk
+        try {
+            packer.write(data);
+        } catch (IOException e) {
+            e.printStackTrace();// TODO Auto-generated catch block
+        }
+
+        byte[] bytes = packer.toByteArray();
+        if (bytes.length > chunkLimit) {
+            try {
+                queue.put(new QueueEvent(databaseName, tableName, bytes));
+            } catch (InterruptedException e) { // ignore
+            }
+            chunks.remove(key);
+        }
     }
 
 
@@ -83,8 +115,6 @@ public class HttpSender implements Sender {
     }
 
     public void close() {
-        // TODO Auto-generated method stub
-
+        senderThread.stop();
     }
-
 }
