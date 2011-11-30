@@ -47,4 +47,8 @@ public interface Config {
     String TD_LOGGER_API_SERVER_PORT = "td.logger.api.server.port";
 
     String TD_LOGGER_API_SERVER_PORT_DEFAULT = "80";
+
+    String TD_LOGGER_AUTO_CREATE_TABLE = "td.logger.create.table.auto";
+
+    String TD_LOGGER_AUTO_CREATE_TABLE_DEFAULT = "false";
 }
