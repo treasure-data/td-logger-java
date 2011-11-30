@@ -17,6 +17,7 @@
 //
 package com.treasure_data.model;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -270,7 +271,7 @@ public class HttpClient extends AbstractClient {
             params.put("schema", JSONValue.toJSONString(schema));
             conn = doPostRequest(path, null, params);
             int code = getResponseCode(conn);
-            if (code != HttpURLConnection.HTTP_OK) { // not 200
+            if (code != HttpURLConnection.HTTP_OK) {
                 String msg = String.format("Create schema table failed (%s (%d): %s)",
                         new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
                 LOG.error(msg);
@@ -293,7 +294,7 @@ public class HttpClient extends AbstractClient {
             String path = String.format("/v3/table/delete/%s/%s", new Object[] { databaseName, name });
             conn = doPostRequest(path, null, null);
             int code = getResponseCode(conn);
-            if (code != HttpURLConnection.HTTP_OK) { // not 200
+            if (code != HttpURLConnection.HTTP_OK) {
                 String msg = String.format("Drop table failed (%s (%d): %s)",
                         new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
                 LOG.error(msg);
@@ -313,52 +314,81 @@ public class HttpClient extends AbstractClient {
         return Table.toType((String) map.get("type"));
     }
 
-    public boolean tail() throws ClientException { // TODO #MN
+    public boolean tail() throws ClientException {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void getJobs() throws ClientException { // TODO #MN
+    public void getJobs() throws ClientException {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void showJob() throws ClientException { // TODO #MN
+    public void showJob() throws ClientException {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void getJobResult() throws ClientException { // TODO #MN
+    public void getJobResult() throws ClientException {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void getJobResultFormat() throws ClientException { // TODO #MN
+    public void getJobResultFormat() throws ClientException {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void killJob() throws ClientException { // TODO #MN
+    public void killJob() throws ClientException {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void doHiveQuery() throws ClientException { // TODO #MN
+    public void doHiveQuery() throws ClientException {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void createSchedule(String scheduleName) throws ClientException { // TODO #MN
+    public void createSchedule(String scheduleName) throws ClientException {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void deleteSchedule(String scheduleName) throws ClientException { // TODO #MN
+    public void deleteSchedule(String scheduleName) throws ClientException {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public List getSchedules() throws ClientException { // TODO #MN
+    @SuppressWarnings("rawtypes")
+    public List getSchedules() throws ClientException {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void history() throws ClientException { // TODO #MN
+    public void history() throws ClientException {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void importData() throws ClientException { // TODO #MN
-        throw new UnsupportedOperationException("Not implement yet.");
+    public void importData(String databaseName, String tableName, String format, byte[] bytes)
+            throws ClientException {
+        // TODO #MN under construction, a little bit..
+        HttpURLConnection conn = null;
+        String jsonData;
+        try {
+            String path = String.format("/v3/table/import/%s/%s/%s",
+                    new Object[] { databaseName, tableName, format });
+            conn = doPutRequest(path, bytes);
+            int code = getResponseCode(conn);
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Import failed (%s (%d): %s)",
+                        new Object[] { getResponseMessage(conn), code, getResponseBody(conn) });
+                LOG.error(msg);
+                if (code == HttpURLConnection.HTTP_BAD_REQUEST) {
+                    throw new AuthenticationException(msg);
+                } else {
+                    throw new ClientException(msg);
+                }
+            }
+            jsonData = getResponseBody(conn); // TODO #MN check format
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                disconnect(conn);
+            }
+        }
+
+        System.out.println("json data: " + jsonData);
     }
 
     public String authenticate(String user, String password) throws ClientException {
@@ -512,36 +542,23 @@ public class HttpClient extends AbstractClient {
         return conn;
     }
 
-    private HttpURLConnection doPutRequest(String path,
-            Map<String, String> header, Map<String, String> params) throws IOException {
+    private HttpURLConnection doPutRequest(String path, byte[] bytes) throws IOException {
         Properties props = System.getProperties();
         String host = props.getProperty(
                 Config.TD_LOGGER_API_SERVER_HOST, Config.TD_LOGGER_API_SERVER_HOST_DEFAULT);
         int port = Integer.parseInt(props.getProperty(
                 Config.TD_LOGGER_API_SERVER_PORT, Config.TD_LOGGER_API_SERVER_PORT_DEFAULT));
 
-        HttpURLConnection conn;
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("http://").append(host).append(":").append(port).append(path);
 
-        if (params != null && !params.isEmpty()) { // parameters
-            sbuf.append("?");
-            int paramSize = params.size();
-            Iterator<Map.Entry<String, String>> iter = params.entrySet().iterator();
-            for (int i = 0; i < paramSize; ++i) {
-                Map.Entry<String, String> e = iter.next();
-                sbuf.append(e.getKey()).append("=").append(e.getValue());
-                if (i + 1 != paramSize) {
-                    sbuf.append("&");
-                }
-            }
-            URL url = new URL(sbuf.toString());
-            conn = (HttpURLConnection) url.openConnection();
-        } else {
-            URL url = new URL(sbuf.toString());
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Content-Length", "0");
-        }
+        URL url = new URL(sbuf.toString());
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setReadTimeout(600 * 1000);
+
+        // parameters
+        conn.setRequestProperty("Content-Type", "application/octet-stream");
+        conn.setRequestProperty("Content-Length", "" + bytes.length);
 
         // header
         conn.setRequestMethod("PUT");
@@ -549,11 +566,13 @@ public class HttpClient extends AbstractClient {
             conn.setRequestProperty("Authorization", "TD1 " + getAPIKey());
         }
         conn.setRequestProperty("Date", toRFC2822Format(new Date()));
-        if (header != null && !header.isEmpty()) {
-            for (Map.Entry<String, String> e : header.entrySet()) {
-                conn.setRequestProperty(e.getKey(), e.getValue());
-            }
-        }
+
+        // body
+        BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
+        out.write(bytes);
+        out.flush();
+        out.close();
+
         conn.connect();
         return conn;
     }
