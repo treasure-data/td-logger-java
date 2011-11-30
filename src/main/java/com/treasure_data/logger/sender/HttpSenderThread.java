@@ -39,11 +39,21 @@ class HttpSenderThread implements Runnable {
 
     private HttpClient client;
 
+    private AtomicBoolean flushNow = new AtomicBoolean(false);
+
+    private long flushInterval = 10 * 1000;
+
+    private long maxFlushInterval = 300 * 1000;
+
+    private double retryWait = 1.0;
+
+    private int retryLimit = 12;
+
     private AtomicBoolean finished = new AtomicBoolean(false);
 
-    private Map<String, BufferPacker> map = new ConcurrentHashMap<String, BufferPacker>();
+    private long nextTime = System.currentTimeMillis() + flushInterval;
 
-    private int chunkLimit = 8 * 1024 * 1024; // 8MB
+    private int errorCount = 0;
 
     HttpSenderThread(LinkedBlockingQueue<QueueEvent> queue, HttpClient client) {
         this.msgpack = new MessagePack();
@@ -53,44 +63,62 @@ class HttpSenderThread implements Runnable {
 
     @Override
     public void run() {
+        upload();
+    }
+
+    private void upload() {
         while (!finished.get()) {
+            long now = System.currentTimeMillis();
+
+            boolean flushed = false;
+            if (nextTime <= now || (flushNow.get() && errorCount == 0)) {
+                flushed = tryFlush();
+                flushNow.set(false);
+            }
+
+            long nextWait;
+            if (errorCount == 0) {
+                if (flushed && flushInterval < maxFlushInterval) {
+                    flushInterval = Math.min(flushInterval + 60 * 1000, maxFlushInterval);
+                }
+                nextWait = flushInterval;
+            } else {
+                nextWait = (long) (retryWait * Math.pow(2, errorCount - 1));
+            }
+            nextTime = nextWait + now;
+        }
+    }
+
+    private boolean tryFlush() {
+        boolean flushed = false;
+
+        while (!queue.isEmpty()) {
             try {
                 QueueEvent ev = queue.take();
-                String key = ev.databaseName + "." + ev.tableName;
-                BufferPacker packer;
-                if (!map.containsKey(key)) {
-                    packer = msgpack.createBufferPacker(4096);
-                    map.put(key, packer);
+                upload(ev);
+                flushed = true;
+            } catch (Exception e) {
+                if (errorCount < retryLimit) {
+                    LOG.error("Failed to upload event logs to Treasure Data, retrying", e);
+                    errorCount += 1;
                 } else {
-                    packer = map.get(key);
+                    LOG.error("Failed to upload event logs to Treasure Data, trashed", e);
+                    errorCount = 0;
+                    queue.clear();
                 }
-
-                byte[] bytes = null;
-                try {
-                    packer.write(ev);
-                    // TODO toByteArray -> getSize
-                    if (packer.toByteArray().length > chunkLimit) {
-                        
-                    }
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            } catch (InterruptedException e) {
             }
         }
 
-        // TODO #MN write code for pre stop process
-        if (queue.size() != 0) {
-            // TODO
-        }
+        return flushed;
+    }
 
-        if (!map.isEmpty()) {
-            // TODO
-        }
+    private void upload(QueueEvent ev) {
+        
     }
 
     synchronized void stop() {
         finished.set(true);
+        flushNow.set(true);
+        // TODO #MN
     }
 }

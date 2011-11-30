@@ -55,16 +55,20 @@ public class HttpSender implements Sender {
         new Thread(senderThread).start();
     }
 
-    public void emit(String tag, Map<String, Object> data) {
-        emit(tag, System.currentTimeMillis(), data);
+    public void emit(String tag, Map<String, Object> record) {
+        emit(tag, System.currentTimeMillis(), record);
     }
 
-    public void emit(String tag, long timestamp, Map<String, Object> data) {
+    public void emit(String tag, long timestamp, Map<String, Object> record) {
+        record.put("time", timestamp);
+        emit0(tag, record);
+    }
+
+    private void emit0(String tag, Map<String, Object> record) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug(String.format("Emit event{tag=%s,ts=%d,data=%s}",
-                    new Object[] { tag, timestamp, data.toString() }));
+            LOG.debug(String.format("Emit event{tag=%s,record=%s}",
+                    new Object[] { tag, record.toString() }));
         }
-        //data.put("time", timestamp); // TODO #MN must fix
 
         String[] splited = tag.split(".");
         String databaseName = splited[splited.length - 2];
@@ -93,17 +97,17 @@ public class HttpSender implements Sender {
 
         // write data to chunk
         try {
-            packer.write(data);
+            packer.write(record);
         } catch (IOException e) {
             LOG.error(String.format("Cannot serialize data to %s.%s",
                     new Object[] { databaseName, tableName }), e);
-            chunks.remove(key); // TODO
+            chunks.remove(key); // TODO #MN
         }
 
-        byte[] bytes = packer.toByteArray();
-        if (bytes.length > chunkLimit) {
+        int bufSize = packer.getBufferSize();
+        if (bufSize > chunkLimit) {
             try {
-                queue.put(new QueueEvent(databaseName, tableName, bytes));
+                queue.put(new QueueEvent(databaseName, tableName, packer.toByteArray()));
             } catch (InterruptedException e) { // ignore
             }
             chunks.remove(key);
