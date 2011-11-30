@@ -44,7 +44,7 @@ public class HttpSender implements Sender {
 
     private HttpSenderThread senderThread;
 
-    public HttpSender(final String apiKey, final String host, final int port) {
+    public HttpSender(final String host, final int port, final String apiKey) {
         if (apiKey == null) {
             throw new IllegalArgumentException("APIKey is required");
         }
@@ -55,11 +55,11 @@ public class HttpSender implements Sender {
         new Thread(senderThread).start();
     }
 
-    public void emit(String tag, Map<String, String> data) {
+    public void emit(String tag, Map<String, Object> data) {
         emit(tag, System.currentTimeMillis(), data);
     }
 
-    public void emit(String tag, long timestamp, Map<String, String> data) {
+    public void emit(String tag, long timestamp, Map<String, Object> data) {
         if (LOG.isDebugEnabled()) {
             LOG.debug(String.format("Emit event{tag=%s,ts=%d,data=%s}",
                     new Object[] { tag, timestamp, data.toString() }));
@@ -95,7 +95,9 @@ public class HttpSender implements Sender {
         try {
             packer.write(data);
         } catch (IOException e) {
-            e.printStackTrace();// TODO Auto-generated catch block
+            LOG.error(String.format("Cannot serialize data to %s.%s",
+                    new Object[] { databaseName, tableName }), e);
+            chunks.remove(key); // TODO
         }
 
         byte[] bytes = packer.toByteArray();
@@ -108,13 +110,23 @@ public class HttpSender implements Sender {
         }
     }
 
-
-    public byte[] getBuffer() {
-        // TODO Auto-generated method stub
-        return null;
+    public byte[] getBuffer() { // TODO #MN need the impl. for testing
+        throw new UnsupportedOperationException();
     }
 
     public void close() {
+        if (!chunks.isEmpty()) {
+            for (Map.Entry<String, BufferPacker> entry : chunks.entrySet()) {
+                String[] splited = entry.getKey().split(".");
+                String databaseName = splited[0];
+                String tableName = splited[1];
+                byte[] bytes = entry.getValue().toByteArray();
+                try {
+                    queue.put(new QueueEvent(databaseName, tableName, bytes));
+                } catch (InterruptedException e) { // ignore
+                }
+            }
+        }
         senderThread.stop();
     }
 }
