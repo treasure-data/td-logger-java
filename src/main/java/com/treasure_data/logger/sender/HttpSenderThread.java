@@ -19,25 +19,21 @@ package com.treasure_data.logger.sender;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPOutputStream;
 
-import org.msgpack.MessagePack;
-import org.msgpack.packer.BufferPacker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.treasure_data.logger.Config;
 import com.treasure_data.model.ClientException;
 import com.treasure_data.model.HttpClient;
+import com.treasure_data.model.Table;
+import com.treasure_data.model.TableCollection;
 
 class HttpSenderThread implements Runnable {
     private static Logger LOG = LoggerFactory.getLogger(HttpSenderThread.class);
-
-    private MessagePack msgpack;
 
     private LinkedBlockingQueue<QueueEvent> queue;
 
@@ -60,7 +56,6 @@ class HttpSenderThread implements Runnable {
     private int errorCount = 0;
 
     HttpSenderThread(LinkedBlockingQueue<QueueEvent> queue, HttpClient client) {
-        this.msgpack = new MessagePack();
         this.queue = queue;
         this.client = client;
     }
@@ -130,7 +125,8 @@ class HttpSenderThread implements Runnable {
                     new Object[] { ev.databaseName, ev.tableName, ev.data.length }));
 
             try {
-                client.importData(ev.databaseName, ev.tableName, "msgpack.gz", bytes);
+                Table table = new TableCollection(client, ev.databaseName).get(ev.tableName);
+                table.importData("msgpack.gz", bytes);
                 retry = false;
             } catch (ClientException e) { // TODO #MN ClientException?
                 if (!Boolean.parseBoolean(System.getProperty(

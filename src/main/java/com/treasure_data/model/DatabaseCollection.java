@@ -7,15 +7,17 @@ public class DatabaseCollection extends ModelCollection<Database> {
     }
 
     @Override
-    boolean create(String name) throws ClientException {
+    Database get(String name) throws ClientException {
+        Database database;
         if (models.containsKey(name)) {
-            models.get(name).create();
+            database = models.get(name);
+            database.create();
         } else {
-            Database database = new Database(client, name, null);
+            database = new Database(client, name, null);
             database.create();
             models.put(name, database);
         }
-        return true;
+        return database;
     }
 
     @Override

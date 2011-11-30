@@ -18,7 +18,6 @@
 package com.treasure_data.model;
 
 import java.util.List;
-import java.util.Map;
 
 public interface Client {
 
@@ -67,13 +66,14 @@ public interface Client {
 
     void deleteSchedule(String scheduleName) throws ClientException;
 
+    @SuppressWarnings("rawtypes")
     List getSchedules() throws ClientException;
 
     void history() throws ClientException;
 
     /** Import API */
 
-    void importData() throws ClientException;
+    void importData(String databaseName, String tableName, String fileName, byte[] bytes) throws ClientException;
 
     /** User API */
 

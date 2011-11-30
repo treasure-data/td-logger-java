@@ -34,7 +34,7 @@ public class Table extends Model {
         } else if (typeName.equals("?")) {
             return Table.Type.UNDEFINED;
         } else {
-            return Table.Type.UNDEFINED; // TODO #MN
+            return Table.Type.UNDEFINED;
         }
     }
 
@@ -81,7 +81,7 @@ public class Table extends Model {
         case ITEM:
             return client.createItemTable(databaseName, name);
         default:
-            return false; // TODO #MN
+            return false;
         }
     }
 
@@ -92,10 +92,10 @@ public class Table extends Model {
     }
 
     public void tail() {
-        throw new UnsupportedOperationException(); // TODO #MN
+        throw new UnsupportedOperationException();
     }
 
-    public void importData() {
-        throw new UnsupportedOperationException(); // TODO
+    public void importData(String format, byte[] bytes) throws ClientException {
+        client.importData(databaseName, name, format, bytes);
     }
 }

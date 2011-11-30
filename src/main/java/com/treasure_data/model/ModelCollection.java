@@ -37,7 +37,7 @@ abstract class ModelCollection<T extends Model> extends Model {
         throw new UnsupportedOperationException();
     }
 
-    abstract boolean create(String name) throws ClientException;
+    abstract T get(String name) throws ClientException;
 
     abstract boolean delete(String name) throws ClientException;
 

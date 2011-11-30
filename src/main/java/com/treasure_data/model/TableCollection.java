@@ -12,19 +12,21 @@ public class TableCollection extends ModelCollection<Table> {
     }
 
     @Override
-    boolean create(String name) throws ClientException {
+    public Table get(String name) throws ClientException {
+        Table table;
         if (models.containsKey(name)) {
-            models.get(name).create();
+            table = models.get(name);
+            table.create();
         } else {
-            Table table = new Table(client, databaseName, name);
+            table = new Table(client, databaseName, name);
             table.create();
             models.put(name, table);
         }
-        return true;
+        return table;
     }
 
     @Override
-    boolean delete(String name) throws ClientException {
+    public boolean delete(String name) throws ClientException {
         if (models.containsKey(name)) {
             Table table = models.remove(name);
             table.delete();
@@ -35,7 +37,7 @@ public class TableCollection extends ModelCollection<Table> {
     }
 
     @Override
-    boolean exist(String name) throws ClientException {
+    public boolean exist(String name) throws ClientException {
         return models.containsKey(name);
     }
 
