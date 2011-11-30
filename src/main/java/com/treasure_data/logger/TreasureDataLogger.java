@@ -86,7 +86,7 @@ public class TreasureDataLogger extends FluentLogger {
             if (!agentMode) {
                 // connected to TD platform directly
                 logger = new TreasureDataLogger(database,
-                        new HttpSender(apiKey, host, port));
+                        new HttpSender(host, port, apiKey));
             } else {
                 // agent mode is connected to specified fluentd
                 logger = new TreasureDataLogger(database,
@@ -109,22 +109,22 @@ public class TreasureDataLogger extends FluentLogger {
     }
 
     @Override
-    public void log(String label, String key, String value) {
+    public void log(String label, String key, Object value) {
         super.log(label, key, value);
     }
 
     @Override
-    public void log(String label, String key, String value, long timestamp) {
+    public void log(String label, String key, Object value, long timestamp) {
         super.log(label, key, value, timestamp);
     }
 
     @Override
-    public void log(String label, Map<String, String> data) {
+    public void log(String label, Map<String, Object> data) {
         super.log(label, data);
     }
 
     @Override
-    public void log(String label, Map<String, String> data, long timestamp) {
+    public void log(String label, Map<String, Object> data, long timestamp) {
         super.log(label, data, timestamp);
     }
 
