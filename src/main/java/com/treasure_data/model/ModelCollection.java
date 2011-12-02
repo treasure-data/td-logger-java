@@ -17,6 +17,7 @@
 //
 package com.treasure_data.model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 abstract class ModelCollection<T extends Model> extends Model {
@@ -25,6 +26,7 @@ abstract class ModelCollection<T extends Model> extends Model {
 
     public ModelCollection(Client client) {
         super(client);
+        models = new HashMap<String, T>();
     }
 
     @Override

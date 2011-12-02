@@ -4,8 +4,6 @@ public class TableCollection extends ModelCollection<Table> {
 
     private String databaseName;
 
-    private String name;
-
     public TableCollection(Client client, String databaseName) {
         super(client);
         this.databaseName = databaseName;
