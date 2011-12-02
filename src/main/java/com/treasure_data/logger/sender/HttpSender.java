@@ -70,7 +70,7 @@ public class HttpSender implements Sender {
                     new Object[] { tag, record.toString() }));
         }
 
-        String[] splited = tag.split(".");
+        String[] splited = tag.split("\\.");
         String databaseName = splited[splited.length - 2];
         String tableName = splited[splited.length - 1];
 
@@ -121,7 +121,7 @@ public class HttpSender implements Sender {
     public void close() {
         if (!chunks.isEmpty()) {
             for (Map.Entry<String, BufferPacker> entry : chunks.entrySet()) {
-                String[] splited = entry.getKey().split(".");
+                String[] splited = entry.getKey().split("\\.");
                 String databaseName = splited[0];
                 String tableName = splited[1];
                 byte[] bytes = entry.getValue().toByteArray();
