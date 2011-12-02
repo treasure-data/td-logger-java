@@ -75,9 +75,4 @@ public interface Client {
 
     double importData(String databaseName, String tableName, String fileName, byte[] bytes) throws ClientException;
 
-    /** User API */
-
-    String authenticate(String user, String password) throws ClientException;
-
-    String getServerStatus() throws ClientException;
 }

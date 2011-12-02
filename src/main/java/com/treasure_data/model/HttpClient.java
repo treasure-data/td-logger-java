@@ -53,9 +53,9 @@ public class HttpClient extends AbstractClient {
         return client;
     }
 
-    public static String stats() throws ClientException {
+    public static String getServerStatus() throws ClientException {
         HttpClient client = new HttpClient(null);
-        return client.getServerStatus();
+        return client.getServerStatus0();
     }
 
     public HttpClient(final String apiKey) {
@@ -393,7 +393,7 @@ public class HttpClient extends AbstractClient {
         return (Double) map.get("elapsed_time"); // TODO #MN here is 'time'??
     }
 
-    public String authenticate(String user, String password) throws ClientException {
+    private String authenticate(String user, String password) throws ClientException {
         HttpURLConnection conn = null;
         String jsonData;
         try {
@@ -422,11 +422,13 @@ public class HttpClient extends AbstractClient {
             }
         }
 
+        System.out.println(jsonData);
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
         return (String) map.get("apikey");
     }
-    public String getServerStatus() throws ClientException {
+
+    private String getServerStatus0() throws ClientException {
         HttpURLConnection conn = null;
         String jsonData;
         try {
