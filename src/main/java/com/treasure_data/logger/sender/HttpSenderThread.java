@@ -65,7 +65,7 @@ class HttpSenderThread implements Runnable {
         upload();
     }
 
-    private void upload() {
+    void upload() {
         while (!finished.get()) {
             long now = System.currentTimeMillis();
 
@@ -88,13 +88,13 @@ class HttpSenderThread implements Runnable {
         }
     }
 
-    private boolean tryFlush() {
+    boolean tryFlush() {
         boolean flushed = false;
 
         while (!queue.isEmpty()) {
             try {
                 QueueEvent ev = queue.take();
-                upload(ev);
+                uploadEvent(ev);
                 flushed = true;
             } catch (Exception e) {
                 if (errorCount < retryLimit) {
@@ -111,7 +111,7 @@ class HttpSenderThread implements Runnable {
         return flushed;
     }
 
-    private void upload(QueueEvent ev) throws IOException, ClientException {
+    void uploadEvent(QueueEvent ev) throws IOException, ClientException {
         boolean retry = true;
         while (retry) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
