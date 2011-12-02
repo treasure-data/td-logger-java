@@ -91,6 +91,15 @@ public class TestHttpClient {
         System.out.println(type);
     }
 
+    @Test
+    public void testAuthenticate() throws Exception {
+        Properties props = System.getProperties();
+        HttpClient c = HttpClient.getClient(
+                props.getProperty("td.logger.api.user"),
+                props.getProperty("td.logger.api.password"));
+        System.out.println(c.getAPIKey());
+    }
+
     @Ignore @Test
     public void testGetServerStatus() throws Exception {
         HttpClient c = new HttpClient(null);
