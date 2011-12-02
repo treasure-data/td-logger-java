@@ -9,15 +9,42 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.fluentd.logger.sender.Event;
+import org.junit.Before;
 import org.junit.Test;
 import org.msgpack.MessagePack;
 import org.msgpack.unpacker.Unpacker;
 
-public class TestTreasureDataLoggerNormalOperation {
+public class TestTDLoggerAgentNormalOperation {
 
     private static List<Event> no01 = new ArrayList<Event>();
+
+    @Before
+    public void setUp() {
+        Properties props = System.getProperties();
+        props.setProperty(Config.TD_LOGGER_AGENT_HOST, "localhost");
+        props.setProperty(Config.TD_LOGGER_AGENT_PORT, "24224");
+        props.setProperty(Config.TD_LOGGER_AGENTMODE, "true");
+    }
+
+    /**
+    @Test
+    public void testSimpleBench() throws Exception {
+        // create logger object
+        TreasureDataLogger logger = TreasureDataLogger.getLogger("tag");
+        long time = System.currentTimeMillis();
+        for (int i = 0; i < 10000; ++i) {
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("k" + i, "v" + i);
+            logger.log("label", data);
+        }
+        time = System.currentTimeMillis() - time;
+        TreasureDataLogger.close();
+        System.out.println(time);
+    }
+     */
 
     @Test
     public void testNormalOperation01() throws Exception {
