@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.logger.Config;
@@ -18,7 +19,7 @@ public class TestHttpSender {
         props.load(TestHttpClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
-    @Test
+    @Ignore @Test
     public void testEmit() throws Exception {
         Properties props = System.getProperties();
         String host = props.getProperty(
@@ -29,7 +30,7 @@ public class TestHttpSender {
         HttpSender sender = new HttpSender(host, port, apiKey);
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("k1", "v1");
-        sender.emit("mugatest.table3", data);
+        sender.emit("mugatest.table1", data);
         System.out.println("finished emit method");
         Thread.sleep(10 * 1000);
         sender.close();

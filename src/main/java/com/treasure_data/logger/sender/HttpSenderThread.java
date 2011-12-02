@@ -84,7 +84,13 @@ class HttpSenderThread implements Runnable {
             } else {
                 nextWait = (long) (retryWait * Math.pow(2, errorCount - 1));
             }
+
             nextTime = nextWait + now;
+
+            try {
+                Thread.sleep(nextWait);
+            } catch (InterruptedException e) {
+            }
         }
     }
 
@@ -94,6 +100,7 @@ class HttpSenderThread implements Runnable {
         while (!queue.isEmpty()) {
             try {
                 QueueEvent ev = queue.take();
+                System.out.println("take (queue size: " + queue.size() + " )");
                 uploadEvent(ev);
                 flushed = true;
             } catch (Exception e) {
@@ -126,7 +133,11 @@ class HttpSenderThread implements Runnable {
 
             try {
                 Table table = new TableCollection(client, ev.databaseName).get(ev.tableName);
+                // TODO debug
+                long time = System.currentTimeMillis();
                 table.importData("msgpack.gz", bytes);
+                time = System.currentTimeMillis() - time;
+                System.out.println("imported: " + time + " sec.");
                 retry = false;
             } catch (ClientException e) { // TODO #MN ClientException?
                 if (!Boolean.parseBoolean(System.getProperty(

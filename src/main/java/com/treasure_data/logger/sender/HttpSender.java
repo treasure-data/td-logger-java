@@ -38,7 +38,8 @@ public class HttpSender implements Sender {
 
     private Map<String, BufferPacker> chunks;
 
-    private int chunkLimit = 8 * 1024 * 1024; // 8MB
+    //private int chunkLimit = 8 * 1024 * 1024; // 8MB
+    private int chunkLimit = 1 * 1024 * 1024; // 8MB // TODO #MN tuning parameter
 
     private LinkedBlockingQueue<QueueEvent> queue;
 
@@ -107,6 +108,7 @@ public class HttpSender implements Sender {
         int bufSize = packer.getBufferSize();
         if (bufSize > chunkLimit) {
             try {
+                System.out.println("put");
                 queue.put(new QueueEvent(databaseName, tableName, packer.toByteArray()));
             } catch (InterruptedException e) { // ignore
             }

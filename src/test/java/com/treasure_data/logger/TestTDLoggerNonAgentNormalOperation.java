@@ -9,63 +9,43 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.fluentd.logger.sender.Event;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.MessagePack;
 import org.msgpack.unpacker.Unpacker;
 
+import com.treasure_data.model.TestHttpClient;
+
 public class TestTDLoggerNonAgentNormalOperation {
 
-    private static List<Event> no01 = new ArrayList<Event>();
+    @Before
+    public void setUp() throws Exception {
+        Properties props = System.getProperties();
+        props.load(TestHttpClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+    }
 
-    @Test
+    @Ignore @Test
     public void testNormalOperation01() throws Exception {
-        int port = 24224;
+        Properties props = System.getProperties();
+        props.setProperty(Config.TD_LOGGER_AGENTMODE, "false");
+        TreasureDataLogger logger = TreasureDataLogger.getLogger("mugatest");
 
-        // start mock server
-        MockFluentd server = new MockFluentd(port, new MockFluentd.MockProcess() {
-            public void process(MessagePack msgpack, Socket socket) throws IOException {
-                BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
-                Unpacker unpacker = msgpack.createUnpacker(in);
-                no01.add(unpacker.read(Event.class));
-                no01.add(unpacker.read(Event.class));
-                socket.close();
+        int count = 100;
+        for (int i = 0; i < 1000 * 1000 * 1000; ++i) {
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("kk:" + ":" + i, "vv:" + ":" + i);
+            logger.log("table1", data);
+            if (count == 100) {
+                Thread.sleep(1);
+                count = 0;
             }
-        });
-        server.start();
-
-        // create logger object
-        TreasureDataLogger logger = TreasureDataLogger.getLogger("tag");
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("t1k1", "t1v1");
-        data.put("t1k2", "t1v2");
-        logger.log("label1", data);
-
-        Map<String, Object> data2 = new HashMap<String, Object>();
-        data2.put("t2k1", "t2v1");
-        data2.put("t2k2", "t2v2");
-        logger.log("label2", data2);
-
-        // close mock server sockets
-        server.close();
-
-        // sleep a little bit
-        Thread.sleep(100);
-
-        // check data
-        assertEquals(2, no01.size());
-        {
-            Event e = no01.get(0);
-            assertEquals("tag.label1", e.tag);
-            assertEquals("t1v1", e.data.get("t1k1"));
-            assertEquals("t1v2", e.data.get("t1k2"));
+            count++;
         }
-        {
-            Event e = no01.get(1);
-            assertEquals("tag.label2", e.tag);
-            assertEquals("t2v1", e.data.get("t2k1"));
-            assertEquals("t2v2", e.data.get("t2k2"));
-        }
+
+        TreasureDataLogger.close();
     }
 }

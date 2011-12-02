@@ -4,9 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.junit.BeforeClass;
@@ -54,7 +52,7 @@ public class TestHttpClient {
     public void testGetTables() throws Exception {
         String apiKey = System.getProperties().getProperty(Config.TD_LOGGER_API_KEY);
         HttpClient client = new HttpClient(apiKey);
-        List<Table> tables = client.getTables("sf");
+        List<Table> tables = client.getTables("mugatest");
         System.out.println(tables);
     }
 
@@ -91,8 +89,8 @@ public class TestHttpClient {
         System.out.println(type);
     }
 
-    @Test
-    public void testAuthenticate() throws Exception {
+    @Ignore @Test
+    public void testGetClient() throws Exception {
         Properties props = System.getProperties();
         HttpClient c = HttpClient.getClient(
                 props.getProperty("td.logger.api.user"),
@@ -102,7 +100,6 @@ public class TestHttpClient {
 
     @Ignore @Test
     public void testGetServerStatus() throws Exception {
-        HttpClient c = new HttpClient(null);
-        assertEquals("ok", c.getServerStatus());
+        assertEquals("ok", HttpClient.getServerStatus());
     }
 }

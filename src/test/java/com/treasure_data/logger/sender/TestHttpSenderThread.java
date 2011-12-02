@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.MessagePack;
 import org.msgpack.packer.BufferPacker;
@@ -30,8 +31,7 @@ public class TestHttpSenderThread {
         assertTrue(true);
     }
 
-    /**
-    @Test
+    @Ignore @Test
     public void testUploadEvent() throws Exception {
         Properties props = System.getProperties();
         String apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
@@ -44,8 +44,7 @@ public class TestHttpSenderThread {
         data.put("time", System.currentTimeMillis());
         packer.write(data);
         byte[] bytes = packer.toByteArray();
-        QueueEvent ev = new QueueEvent("mugatest", "table2", bytes);
+        QueueEvent ev = new QueueEvent("mugatest", "table1", bytes);
         thread.uploadEvent(ev);
     }
-    */
 }
