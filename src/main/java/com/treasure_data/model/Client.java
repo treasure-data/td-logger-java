@@ -73,7 +73,7 @@ public interface Client {
 
     /** Import API */
 
-    void importData(String databaseName, String tableName, String fileName, byte[] bytes) throws ClientException;
+    double importData(String databaseName, String tableName, String fileName, byte[] bytes) throws ClientException;
 
     /** User API */
 

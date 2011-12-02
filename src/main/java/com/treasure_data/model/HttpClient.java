@@ -359,7 +359,7 @@ public class HttpClient extends AbstractClient {
         throw new UnsupportedOperationException("Not implement yet.");
     }
 
-    public void importData(String databaseName, String tableName, String format, byte[] bytes)
+    public double importData(String databaseName, String tableName, String format, byte[] bytes)
             throws ClientException {
         // TODO #MN under construction, a little bit..
         HttpURLConnection conn = null;
@@ -388,7 +388,9 @@ public class HttpClient extends AbstractClient {
             }
         }
 
-        System.out.println("json data: " + jsonData);
+        @SuppressWarnings("rawtypes")
+        Map map = (Map) JSONValue.parse(jsonData);
+        return (Double) map.get("elapsed_time"); // TODO #MN here is 'time'??
     }
 
     public String authenticate(String user, String password) throws ClientException {
@@ -568,6 +570,7 @@ public class HttpClient extends AbstractClient {
         conn.setRequestProperty("Date", toRFC2822Format(new Date()));
 
         // body
+        conn.setDoOutput(true);
         BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
         out.write(bytes);
         out.flush();
