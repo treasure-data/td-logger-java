@@ -29,25 +29,8 @@ public class TestTDLoggerAgentNormalOperation {
         props.setProperty(Config.TD_LOGGER_AGENTMODE, "true");
     }
 
-    /**
     @Test
-    public void testSimpleBench() throws Exception {
-        // create logger object
-        TreasureDataLogger logger = TreasureDataLogger.getLogger("tag");
-        long time = System.currentTimeMillis();
-        for (int i = 0; i < 10000; ++i) {
-            Map<String, Object> data = new HashMap<String, Object>();
-            data.put("k" + i, "v" + i);
-            logger.log("label", data);
-        }
-        time = System.currentTimeMillis() - time;
-        TreasureDataLogger.close();
-        System.out.println(time);
-    }
-     */
-
-    @Test
-    public void testNormalOperation01() throws Exception {
+    public void testNormal01() throws Exception {
         int port = 24224;
 
         // start mock server
@@ -95,4 +78,21 @@ public class TestTDLoggerAgentNormalOperation {
             assertEquals("t2v2", e.data.get("t2k2"));
         }
     }
+
+    /**
+    @Test
+    public void testSimpleBench() throws Exception {
+        // create logger object
+        TreasureDataLogger logger = TreasureDataLogger.getLogger("tag");
+        long time = System.currentTimeMillis();
+        for (int i = 0; i < 10000; ++i) {
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("k" + i, "v" + i);
+            logger.log("label", data);
+        }
+        time = System.currentTimeMillis() - time;
+        TreasureDataLogger.close();
+        System.out.println(time);
+    }
+     */
 }

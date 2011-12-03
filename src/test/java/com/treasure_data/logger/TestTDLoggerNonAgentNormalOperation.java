@@ -28,8 +28,8 @@ public class TestTDLoggerNonAgentNormalOperation {
         props.load(TestHttpClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
-    @Ignore @Test
-    public void testNormalOperation01() throws Exception {
+    @Test
+    public void testNormal01() throws Exception {
         Properties props = System.getProperties();
         props.setProperty(Config.TD_LOGGER_AGENTMODE, "false");
         TreasureDataLogger logger = TreasureDataLogger.getLogger("mugatest");
