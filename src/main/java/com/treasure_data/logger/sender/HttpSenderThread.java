@@ -128,16 +128,22 @@ class HttpSenderThread implements Runnable {
             gzout.close();
             byte[] bytes = out.toByteArray();
 
-            LOG.debug(String.format("Uploading event logs to %s.%s table on Treasure Data (%d bytes)",
-                    new Object[] { ev.databaseName, ev.tableName, ev.data.length }));
-
             try {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(String.format(
+                            "Uploading event logs to %s.%s table on Treasure Data (%d bytes)",
+                            new Object[] { ev.databaseName, ev.tableName, ev.data.length }));
+                }
+
                 Table table = new TableCollection(client, ev.databaseName).get(ev.tableName);
-                // TODO debug
                 long time = System.currentTimeMillis();
                 table.importData("msgpack.gz", bytes);
                 time = System.currentTimeMillis() - time;
-                System.out.println("imported: " + time + " sec.");
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(String.format("Uploaded in %d sec.", new Object[] { time } ));
+                }
+
                 retry = false;
             } catch (ClientException e) { // TODO #MN ClientException?
                 if (!Boolean.parseBoolean(System.getProperty(
