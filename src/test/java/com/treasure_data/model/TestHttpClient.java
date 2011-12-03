@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -18,8 +18,8 @@ import com.treasure_data.model.Table;
 
 public class TestHttpClient {
 
-    @BeforeClass
-    public static void setUp() throws IOException {
+    @Before
+    public void setUp() throws IOException {
         Properties props = System.getProperties();
         props.load(TestHttpClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
