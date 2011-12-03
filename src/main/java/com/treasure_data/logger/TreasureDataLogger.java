@@ -58,7 +58,6 @@ public class TreasureDataLogger extends FluentLogger {
                         String.format("APIKey option is required as java property: %s",
                                 new Object[] { Config.TD_LOGGER_API_KEY }));
             }
-            // TODO #MN auto create table (this parameter is needed?)
             host = props.getProperty(
                     Config.TD_LOGGER_API_SERVER_HOST, Config.TD_LOGGER_API_SERVER_HOST_DEFAULT);
             port = Integer.parseInt(props.getProperty(
