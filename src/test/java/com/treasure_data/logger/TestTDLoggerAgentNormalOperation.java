@@ -13,6 +13,7 @@ import java.util.Properties;
 
 import org.fluentd.logger.sender.Event;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.MessagePack;
 import org.msgpack.unpacker.Unpacker;
@@ -23,6 +24,7 @@ public class TestTDLoggerAgentNormalOperation {
 
     @Before
     public void setUp() {
+        no01.clear();
         Properties props = System.getProperties();
         props.setProperty(Config.TD_LOGGER_AGENT_HOST, "localhost");
         props.setProperty(Config.TD_LOGGER_AGENT_PORT, "24224");
@@ -31,7 +33,9 @@ public class TestTDLoggerAgentNormalOperation {
 
     @Test
     public void testNormal01() throws Exception {
-        int port = 24224;
+        Properties props = System.getProperties();
+        int port = Integer.parseInt(props.getProperty(
+                Config.TD_LOGGER_AGENT_PORT, Config.TD_LOGGER_AGENT_PORT_DEFAULT));
 
         // start mock server
         MockFluentd server = new MockFluentd(port, new MockFluentd.MockProcess() {
@@ -45,17 +49,20 @@ public class TestTDLoggerAgentNormalOperation {
         });
         server.start();
 
-        // create logger object
-        TreasureDataLogger logger = TreasureDataLogger.getLogger("tag");
-        Map<String, Object> data = new HashMap<String, Object>();
+        Map<String, Object> data;
+
+        // create logger objects
+        TreasureDataLogger logger1 = TreasureDataLogger.getLogger("tag1");
+
+        data = new HashMap<String, Object>();
         data.put("t1k1", "t1v1");
         data.put("t1k2", "t1v2");
-        logger.log("label1", data);
+        logger1.log("label1", data);
 
-        Map<String, Object> data2 = new HashMap<String, Object>();
-        data2.put("t2k1", "t2v1");
-        data2.put("t2k2", "t2v2");
-        logger.log("label2", data2);
+        data = new HashMap<String, Object>();
+        data.put("t1k1", "t1v1");
+        data.put("t1k2", "t1v2");
+        logger1.log("label2", data);
 
         // close mock server sockets
         server.close();
@@ -67,15 +74,15 @@ public class TestTDLoggerAgentNormalOperation {
         assertEquals(2, no01.size());
         {
             Event e = no01.get(0);
-            assertEquals("tag.label1", e.tag);
+            assertEquals("tag1.label1", e.tag);
             assertEquals("t1v1", e.data.get("t1k1"));
             assertEquals("t1v2", e.data.get("t1k2"));
         }
         {
             Event e = no01.get(1);
-            assertEquals("tag.label2", e.tag);
-            assertEquals("t2v1", e.data.get("t2k1"));
-            assertEquals("t2v2", e.data.get("t2k2"));
+            assertEquals("tag1.label2", e.tag);
+            assertEquals("t1v1", e.data.get("t1k1"));
+            assertEquals("t1v2", e.data.get("t1k2"));
         }
     }
 
