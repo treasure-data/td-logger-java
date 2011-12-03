@@ -20,8 +20,10 @@ public class TestHttpClient {
 
     @Before
     public void setUp() throws IOException {
+        /**
         Properties props = System.getProperties();
         props.load(TestHttpClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+        */
     }
 
     @Ignore @Test

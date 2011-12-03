@@ -27,7 +27,7 @@ public class TestTDLoggerAgentNormalOperation {
         no01.clear();
         Properties props = System.getProperties();
         props.setProperty(Config.TD_LOGGER_AGENT_HOST, "localhost");
-        props.setProperty(Config.TD_LOGGER_AGENT_PORT, "25224");
+        props.setProperty(Config.TD_LOGGER_AGENT_PORT, "25225");
         props.setProperty(Config.TD_LOGGER_AGENTMODE, "true");
     }
 
