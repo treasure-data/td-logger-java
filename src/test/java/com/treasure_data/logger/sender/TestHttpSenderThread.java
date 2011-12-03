@@ -26,11 +26,6 @@ public class TestHttpSenderThread {
         props.load(TestHttpClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
-    @Test
-    public void testDummy() {
-        assertTrue(true);
-    }
-
     @Ignore @Test
     public void testUploadEvent() throws Exception {
         Properties props = System.getProperties();
