@@ -83,12 +83,12 @@ public class HttpSender implements Sender {
         if (!HttpClient.validateDatabaseName(databaseName)) {
             String msg = String.format("Invalid database name %s", new Object[] { databaseName });
             LOG.error(msg);
-            throw new IllegalArgumentException(msg); // another exception throwing TODO
+            throw new IllegalArgumentException(msg);
         }
         if (!HttpClient.validateTableName(tableName)) {
             String msg = String.format("Invalid table name %s", new Object[] { tableName });
             LOG.error(msg);
-            throw new IllegalArgumentException(msg); // another exceptionthrowing TODO
+            throw new IllegalArgumentException(msg);
         }
 
         String key = databaseName + "." + tableName;
@@ -107,7 +107,7 @@ public class HttpSender implements Sender {
         } catch (IOException e) {
             LOG.error(String.format("Cannot serialize data to %s.%s",
                     new Object[] { databaseName, tableName }), e);
-            chunks.remove(key); // TODO #MN
+            chunks.remove(key);
             return false;
         }
 
