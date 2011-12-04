@@ -108,23 +108,23 @@ public class TreasureDataLogger extends FluentLogger {
     }
 
     @Override
-    public void log(String label, String key, Object value) {
-        super.log(label, key, value);
+    public boolean log(String label, String key, Object value) {
+        return super.log(label, key, value);
     }
 
     @Override
-    public void log(String label, String key, Object value, long timestamp) {
-        super.log(label, key, value, timestamp);
+    public boolean log(String label, String key, Object value, long timestamp) {
+        return super.log(label, key, value, timestamp);
     }
 
     @Override
-    public void log(String label, Map<String, Object> data) {
-        super.log(label, data);
+    public boolean log(String label, Map<String, Object> data) {
+        return super.log(label, data);
     }
 
     @Override
-    public void log(String label, Map<String, Object> data, long timestamp) {
-        super.log(label, data, timestamp);
+    public boolean log(String label, Map<String, Object> data, long timestamp) {
+        return super.log(label, data, timestamp);
     }
 
     @Override
