@@ -43,6 +43,8 @@ public class HttpSender implements Sender {
 
     private LinkedBlockingQueue<QueueEvent> queue;
 
+    private int queueLimit = 50;
+
     private HttpSenderThread senderThread;
 
     public HttpSender(final String host, final int port, final String apiKey) {
@@ -103,6 +105,12 @@ public class HttpSender implements Sender {
             LOG.error(String.format("Cannot serialize data to %s.%s",
                     new Object[] { databaseName, tableName }), e);
             chunks.remove(key); // TODO #MN
+        }
+
+        // check queue limit
+        if (queue.size() > queueLimit) {
+            LOG.error("queue length exceeds limit. cannot add new event log");
+            return false;
         }
 
         int bufSize = packer.getBufferSize();
