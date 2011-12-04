@@ -17,11 +17,9 @@
 //
 package com.treasure_data.logger.sender;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.zip.GZIPOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,13 +119,6 @@ class HttpSenderThread implements Runnable {
     void uploadEvent(QueueEvent ev) throws IOException, ClientException {
         boolean retry = true;
         while (retry) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            GZIPOutputStream gzout = new GZIPOutputStream(out);
-            gzout.write(ev.data);
-            gzout.flush();
-            gzout.close();
-            byte[] bytes = out.toByteArray();
-
             try {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(String.format(
@@ -137,7 +128,7 @@ class HttpSenderThread implements Runnable {
 
                 Table table = new TableCollection(client, ev.databaseName).get(ev.tableName);
                 long time = System.currentTimeMillis();
-                table.importData("msgpack.gz", bytes);
+                table.importData("msgpack.gz", ev.data);
                 time = System.currentTimeMillis() - time;
 
                 if (LOG.isDebugEnabled()) {

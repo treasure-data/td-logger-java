@@ -17,14 +17,16 @@
 //
 package com.treasure_data.logger.sender;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.zip.GZIPOutputStream;
 
 import org.fluentd.logger.sender.Sender;
 import org.msgpack.MessagePack;
-import org.msgpack.packer.BufferPacker;
+import org.msgpack.packer.Packer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +38,7 @@ public class HttpSender implements Sender {
 
     private MessagePack msgpack;
 
-    private Map<String, BufferPacker> chunks;
+    private Map<String, ByteArrayOutputStream> chunks;
 
     //private int chunkLimit = 8 * 1024 * 1024; // 8MB
     private int chunkLimit = 1 * 1024 * 1024; // 8MB // TODO #MN tuning parameter
@@ -52,7 +54,7 @@ public class HttpSender implements Sender {
             throw new IllegalArgumentException("APIKey is required");
         }
         msgpack = new MessagePack();
-        chunks = new ConcurrentHashMap<String, BufferPacker>();
+        chunks = new ConcurrentHashMap<String, ByteArrayOutputStream>();
         queue = new LinkedBlockingQueue<QueueEvent>();
         senderThread = new HttpSenderThread(queue, new HttpClient(apiKey));
         new Thread(senderThread).start();
@@ -90,16 +92,17 @@ public class HttpSender implements Sender {
         }
 
         String key = databaseName + "." + tableName;
-        BufferPacker packer;
+        ByteArrayOutputStream out;
         if (!chunks.containsKey(key)) {
-            packer = msgpack.createBufferPacker(4096);
-            chunks.put(key, packer);
+            out = new ByteArrayOutputStream();
+            chunks.put(key, out);
         } else {
-            packer = chunks.get(key);
+            out = chunks.get(key);
         }
 
         // write data to chunk
         try {
+            Packer packer = msgpack.createPacker(new GZIPOutputStream(out));
             packer.write(record);
         } catch (IOException e) {
             LOG.error(String.format("Cannot serialize data to %s.%s",
@@ -114,11 +117,10 @@ public class HttpSender implements Sender {
             return false;
         }
 
-        int bufSize = packer.getBufferSize();
-        if (bufSize > chunkLimit) {
+        if (out.size() > chunkLimit) {
             try {
                 System.out.println("put");
-                queue.put(new QueueEvent(databaseName, tableName, packer.toByteArray()));
+                queue.put(new QueueEvent(databaseName, tableName, out.toByteArray()));
             } catch (InterruptedException e) { // ignore
             }
             chunks.remove(key);
@@ -132,7 +134,7 @@ public class HttpSender implements Sender {
 
     public void close() {
         if (!chunks.isEmpty()) {
-            for (Map.Entry<String, BufferPacker> entry : chunks.entrySet()) {
+            for (Map.Entry<String, ByteArrayOutputStream> entry : chunks.entrySet()) {
                 String[] splited = entry.getKey().split("\\.");
                 String databaseName = splited[0];
                 String tableName = splited[1];
