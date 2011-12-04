@@ -58,16 +58,16 @@ public class HttpSender implements Sender {
         new Thread(senderThread).start();
     }
 
-    public void emit(String tag, Map<String, Object> record) {
-        emit(tag, System.currentTimeMillis(), record);
+    public boolean emit(String tag, Map<String, Object> record) {
+        return emit(tag, System.currentTimeMillis(), record);
     }
 
-    public void emit(String tag, long timestamp, Map<String, Object> record) {
+    public boolean emit(String tag, long timestamp, Map<String, Object> record) {
         record.put("time", timestamp);
-        emit0(tag, record);
+        return emit0(tag, record);
     }
 
-    private void emit0(String tag, Map<String, Object> record) {
+    private boolean emit0(String tag, Map<String, Object> record) {
         if (LOG.isDebugEnabled()) {
             LOG.debug(String.format("Emit event{tag=%s,record=%s}",
                     new Object[] { tag, record.toString() }));
@@ -81,12 +81,12 @@ public class HttpSender implements Sender {
         if (!HttpClient.validateDatabaseName(databaseName)) {
             String msg = String.format("Invalid database name %s", new Object[] { databaseName });
             LOG.error(msg);
-            throw new IllegalArgumentException(msg);
+            throw new IllegalArgumentException(msg); // another exception throwing TODO
         }
         if (!HttpClient.validateTableName(tableName)) {
             String msg = String.format("Invalid table name %s", new Object[] { tableName });
             LOG.error(msg);
-            throw new IllegalArgumentException(msg);
+            throw new IllegalArgumentException(msg); // another exceptionthrowing TODO
         }
 
         String key = databaseName + "." + tableName;
@@ -105,6 +105,7 @@ public class HttpSender implements Sender {
             LOG.error(String.format("Cannot serialize data to %s.%s",
                     new Object[] { databaseName, tableName }), e);
             chunks.remove(key); // TODO #MN
+            return false;
         }
 
         // check queue limit
@@ -122,6 +123,7 @@ public class HttpSender implements Sender {
             }
             chunks.remove(key);
         }
+        return true;
     }
 
     public byte[] getBuffer() { // TODO #MN need the impl. for testing
