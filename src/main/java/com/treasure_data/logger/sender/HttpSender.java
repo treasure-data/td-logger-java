@@ -119,6 +119,11 @@ public class HttpSender implements Sender {
         if (packer.getChunkSize() > chunkLimit) {
             try {
                 queue.put(new QueueEvent(databaseName, tableName, packer.getByteArray()));
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(String.format("Put event on queue (size: %d)",
+                            new Object[] { queue.size() }));
+                }
             } catch (InterruptedException e) { // ignore
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);

@@ -98,7 +98,12 @@ class HttpSenderThread implements Runnable {
         while (!queue.isEmpty()) {
             try {
                 QueueEvent ev = queue.take();
-                System.out.println("take (queue size: " + queue.size() + " )");
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(String.format("Toke event from queue (size: %d)",
+                            new Object[] { queue.size() }));
+                }
+
                 uploadEvent(ev);
                 flushed = true;
             } catch (Exception e) {
