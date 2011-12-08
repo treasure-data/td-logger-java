@@ -21,6 +21,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -174,7 +175,6 @@ public class HttpClient extends AbstractClient {
             long count = (Long) tableMap.get("count");
             List<Map<String, String>> schema = (List<Map<String, String>>)
                     JSONValue.parse((String) tableMap.get("schema"));
-            System.out.println(schema);
             Table table = new Table(this, databaseName, tableName, Table.toType(typeName), count, schema);
             tables.add(table);
         }
@@ -196,7 +196,6 @@ public class HttpClient extends AbstractClient {
             long count = (Long) tableMap.get("count");
             List<Map<String, String>> schema = (List<Map<String, String>>)
                     JSONValue.parse((String) tableMap.get("schema"));
-            System.out.println(schema);
             return new Table(this, databaseName, tableName, Table.toType(typeName), count, schema);
         }
         throw new NotFoundException(String.format("Table '%s.%s' does not exist",
@@ -388,6 +387,7 @@ public class HttpClient extends AbstractClient {
             }
         }
 
+        System.out.println(jsonData);
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
         return (Double) map.get("elapsed_time"); // TODO #MN here is 'time'??
@@ -422,7 +422,6 @@ public class HttpClient extends AbstractClient {
             }
         }
 
-        System.out.println(jsonData);
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
         return (String) map.get("apikey");
@@ -559,26 +558,23 @@ public class HttpClient extends AbstractClient {
         URL url = new URL(sbuf.toString());
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setReadTimeout(600 * 1000);
-
-        // parameters
-        conn.setRequestProperty("Content-Type", "application/octet-stream");
-        conn.setRequestProperty("Content-Length", "" + bytes.length);
-
-        // header
         conn.setRequestMethod("PUT");
+        //conn.setRequestProperty("Content-Type", "application/octet-stream");
+        conn.setRequestProperty("Content-Length", "" + bytes.length);
         if (getAPIKey() != null) {
             conn.setRequestProperty("Authorization", "TD1 " + getAPIKey());
         }
         conn.setRequestProperty("Date", toRFC2822Format(new Date()));
+        conn.setDoOutput(true);
+        conn.setUseCaches (false);
+        //conn.connect();
 
         // body
-        conn.setDoOutput(true);
         BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
         out.write(bytes);
         out.flush();
-        out.close();
+        //out.close();
 
-        conn.connect();
         return conn;
     }
 
