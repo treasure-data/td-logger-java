@@ -34,16 +34,18 @@ public class TestTDLoggerNonAgentNormalOperation {
         props.setProperty(Config.TD_LOGGER_AGENTMODE, "false");
         TreasureDataLogger logger = TreasureDataLogger.getLogger("mugatest");
 
-        int count = 100;
+        int count = 0;
         for (int i = 0; i < 1000 * 1000 * 1000; ++i) {
             Map<String, Object> data = new HashMap<String, Object>();
-            data.put("kk:" + ":" + i, "vv:" + ":" + i);
-            logger.log("table1", data);
-            if (count == 100) {
-                Thread.sleep(1);
-                count = 0;
+            for (int j = 0; j < 128; ++j) {
+                data.put("kk:" + ":" + j, "vv:" + ":" + j);
+                if (count == 1000) {
+                    Thread.sleep(1);
+                    count = 0;
+                }
+                count++;
             }
-            count++;
+            logger.log("table1", data);
         }
 
         TreasureDataLogger.close();

@@ -1,6 +1,7 @@
 package com.treasure_data.logger.sender;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -9,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +41,14 @@ public class TestExtendedPacker {
             data.put("ki:" + i, i);
             packer.write(data);
         }
+        out.flush();
+        out.close();
         byte[] expected = out.toByteArray();
+        out = new ByteArrayOutputStream();
+        GZIPOutputStream gzout = new GZIPOutputStream(out);
+        gzout.write(expected);
+        gzout.finish();
+        int expectedSize = out.size();
 
         // actual
         ExtendedPacker extpacker = new ExtendedPacker(msgpack);
@@ -62,6 +71,7 @@ public class TestExtendedPacker {
         out.close();
         byte[] actual = out.toByteArray();
 
+        assertEquals(expectedSize, extpacker.getChunkSize());
         assertArrayEquals(expected, actual);
     }
 
