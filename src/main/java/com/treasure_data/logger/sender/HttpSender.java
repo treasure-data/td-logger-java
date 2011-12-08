@@ -17,31 +17,26 @@
 //
 package com.treasure_data.logger.sender;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.zip.GZIPOutputStream;
 
 import org.fluentd.logger.sender.Sender;
 import org.msgpack.MessagePack;
-import org.msgpack.packer.Packer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.treasure_data.model.HttpClient;
 
 public class HttpSender implements Sender {
-
     private static Logger LOG = LoggerFactory.getLogger(HttpSender.class);
 
     private MessagePack msgpack;
 
-    private Map<String, ByteArrayOutputStream> chunks;
+    private Map<String, ExtendedPacker> chunks;
 
-    //private int chunkLimit = 8 * 1024 * 1024; // 8MB
-    private int chunkLimit = 1 * 1024 * 1024; // 8MB // TODO #MN tuning parameter
+    private int chunkLimit = 8 * 1024 * 1024; // 8MB
 
     private LinkedBlockingQueue<QueueEvent> queue;
 
@@ -54,7 +49,7 @@ public class HttpSender implements Sender {
             throw new IllegalArgumentException("APIKey is required");
         }
         msgpack = new MessagePack();
-        chunks = new ConcurrentHashMap<String, ByteArrayOutputStream>();
+        chunks = new ConcurrentHashMap<String, ExtendedPacker>();
         queue = new LinkedBlockingQueue<QueueEvent>();
         senderThread = new HttpSenderThread(queue, new HttpClient(apiKey));
         new Thread(senderThread).start();
@@ -91,39 +86,45 @@ public class HttpSender implements Sender {
             throw new IllegalArgumentException(msg);
         }
 
-        String key = databaseName + "." + tableName;
-        ByteArrayOutputStream out;
-        if (!chunks.containsKey(key)) {
-            out = new ByteArrayOutputStream();
-            chunks.put(key, out);
-        } else {
-            out = chunks.get(key);
-        }
-
-        // write data to chunk
-        try {
-            Packer packer = msgpack.createPacker(new GZIPOutputStream(out));
-            packer.write(record);
-        } catch (IOException e) {
-            LOG.error(String.format("Cannot serialize data to %s.%s",
-                    new Object[] { databaseName, tableName }), e);
-            chunks.remove(key);
-            return false;
-        }
-
         // check queue limit
         if (queue.size() > queueLimit) {
             LOG.error("queue length exceeds limit. cannot add new event log");
             return false;
         }
 
-        if (out.size() > chunkLimit) {
+        String key = databaseName + "." + tableName;
+        ExtendedPacker packer = null;
+        if (!chunks.containsKey(key)) {
             try {
-                System.out.println("put");
-                queue.put(new QueueEvent(databaseName, tableName, out.toByteArray()));
-            } catch (InterruptedException e) { // ignore
+                packer = new ExtendedPacker(msgpack);
+                chunks.put(key, packer);
+            } catch (IOException e) {
+                LOG.error("Cannot create packer object", e);
+                return false;
             }
+        } else {
+            packer = chunks.get(key);
+        }
+
+        // write data to chunk
+        try {
+            packer.write(record);
+        } catch (Exception e) {
+            LOG.error(String.format("Cannot serialize data to %s.%s",
+                    new Object[] { databaseName, tableName }), e);
             chunks.remove(key);
+            return false;
+        }
+
+        if (packer.getChunkSize() > chunkLimit) {
+            try {
+                queue.put(new QueueEvent(databaseName, tableName, packer.getByteArray()));
+            } catch (InterruptedException e) { // ignore
+            } catch (IOException e) {
+                LOG.error(e.getMessage(), e);
+            } finally {
+                chunks.remove(key);
+            }
         }
         return true;
     }
@@ -134,14 +135,18 @@ public class HttpSender implements Sender {
 
     public void close() {
         if (!chunks.isEmpty()) {
-            for (Map.Entry<String, ByteArrayOutputStream> entry : chunks.entrySet()) {
+            for (Map.Entry<String, ExtendedPacker> entry : chunks.entrySet()) {
                 String[] splited = entry.getKey().split("\\.");
                 String databaseName = splited[0];
                 String tableName = splited[1];
-                byte[] bytes = entry.getValue().toByteArray();
                 try {
-                    queue.put(new QueueEvent(databaseName, tableName, bytes));
-                } catch (InterruptedException e) { // ignore
+                    byte[] bytes = entry.getValue().getByteArray();
+                    try {
+                        queue.put(new QueueEvent(databaseName, tableName, bytes));
+                    } catch (InterruptedException e) { // ignore
+                    }
+                } catch (IOException e) {
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }
