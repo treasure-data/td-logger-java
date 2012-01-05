@@ -51,6 +51,21 @@ You can configure your pom.xml as follows to use it:
         <url>http://treasure-data.com/maven2</url>
       </repository>
     <repositories>
+    
+### Install with SBT (Build tool Scala)
+
+To install td-logger From SBT (a build tool for Scala), please add the following lines to your build.sbt.
+
+    /* in build.sbt */
+    // Repositories
+    resolvers ++= Seq(
+      "td-logger     Maven2 Repository" at "http://treasure-data.com/maven2/",
+      "fluent-logger Maven2 Repository" at "http://fluentd.org/maven2/"
+    )
+    // Dependencies
+    libraryDependencies ++= Seq(
+      "com.treasure_data" % "td-logger" % "0.1.0"
+    )
 
 ### Install from GitHub repository
 
