@@ -128,7 +128,7 @@ application is finished.
     TreasureDataLogger.close();
 
 See doApp method in Main class.  You can upload event logs with log method.
-Event logs should be declared as variables of Map<String, Object> type.
+Event logs should be declared as variables of Map\<String, Object\> type.
 
 ### Direct upload and In-direct upload
 
