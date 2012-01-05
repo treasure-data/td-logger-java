@@ -84,7 +84,9 @@ For more detail, see pom.xml.
 
 ## Quickstart
 
-The following program is a small example of Treasure Data Logger for Java.
+### Small example with Treasure Data Logger
+
+The following program is a small example of Treasure Data Logger.
 
     import java.io.IOException;
     import java.util.HashMap;
@@ -99,36 +101,56 @@ The following program is a small example of Treasure Data Logger for Java.
             try {
                 Properties props = System.getProperties();
                 props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+
                 LOG = TreasureDataLogger.getLogger("mydatabase");
             } catch (IOException e) {
                 // do something
             }
         }
 
-        public void doApplicationLogic() {
-            // ...
+        public void doApp() {
+
             Map<String, Object> data = new HashMap<String, Object>();
             data.put("from", "userA");
             data.put("to", "userB");
-            LOG.log("follow", data);
-            // ...
+            LOG.log("follow_table", data);
+
         }
     }
 
-To create Treasure Data Logger instances, users need to invoke getLogger method 
-in Treasure Data Logger class like well-known logging libraries.  The method
-should be called only once.
-
-Before executing the Main program, you need to set the treasure-data.properties
-file to your classpath.  Information of your API key should be described in the
-file like this.
-
-    td.logger.api.key=<your API key>
+See static initializer in Main class.  To create TreasureDataLogger instances,
+you need to invoke getLogger method in TreasureDataLogger class like well-known
+logging libraries.  The method should be called only once.
 
 Close method in TreasureDataLogger class should be called explicitly when 
 application is finished.
 
     TreasureDataLogger.close();
+
+See doApp method in Main class.  You can upload event logs with log method.
+Event logs should be declared as variables of Map<String, Object> type.
+
+### Direct upload and In-direct upload
+
+You can choose how to upload event logs from the following methods.
+
+  * Direct upload from your applications
+  * In-direct upload from td-agent
+
+To switch between them, you can specify Java options and system properties on
+the command line, or by using an options file.  If you want to directly upload
+event logs from your application, you should set your own values to the
+following properties in treasure-data.properties file.
+
+    td.logger.agentmode=false
+    td.logger.api.key=<your API key>
+
+On the other hand if you want to upload data via td-agent, you should declare
+the following properties in the file.
+
+    td.logger.agentmode=true
+    td.logger.agent.host=<your td-agent host>
+    td.logger.agent.port=<your td-agent port>
 
 ## License
 
