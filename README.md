@@ -133,6 +133,7 @@ Event logs should be declared as variables of Map<String, Object> type.
 ### Direct upload and In-direct upload
 
 You can choose how to upload event logs from the following methods.
+Installing td-agent is [here](http://help.treasure-data.com/kb/installing-td-agent-daemon).
 
   * Direct upload from your applications
   * In-direct upload from td-agent
