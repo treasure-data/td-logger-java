@@ -50,6 +50,11 @@ You can configure your pom.xml as follows to use it:
         <name>Treasure Data's Maven2 Repository</name>
         <url>http://treasure-data.com/maven2</url>
       </repository>
+      <repository>
+        <id>fluentd.org</id>
+        <name>Fluentd's Maven2 Repository</name>
+        <url>http://fluentd.org/maven2</url>
+      </repository>
     <repositories>
     
 ### Install with SBT (Build tool Scala)
