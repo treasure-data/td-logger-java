@@ -48,11 +48,19 @@ public class TreasureDataLogger extends FluentLogger {
 
         String key, host, apiKey = null;
         int port, timeout = 0, bufferCapacity = 0;
+
         boolean agentMode = Boolean.parseBoolean(props.getProperty(
                 Config.TD_LOGGER_AGENTMODE, Config.TD_LOGGER_AGENTMODE_DEFAULT));
 
+        apiKey = System.getenv(Config.TD_ENV_API_KEY);
+        if (apiKey != null && !apiKey.equals("")) {
+            agentMode = false;
+        }
+
         if (!agentMode) {
-            apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
+            if (apiKey == null) {
+                apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
+            }
             if (apiKey == null) {
                 throw new IllegalArgumentException(
                         String.format("APIKey option is required as java property: %s",

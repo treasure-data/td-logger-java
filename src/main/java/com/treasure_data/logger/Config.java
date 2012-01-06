@@ -38,6 +38,8 @@ public interface Config {
 
     String TD_LOGGER_AGENT_BUFCAPACITY_DEFAULT = "1048576"; // 1 * 1024 * 1024
 
+    String TD_ENV_API_KEY = "TREASURE_DATA_API_KEY";
+
     String TD_LOGGER_API_KEY = "td.logger.api.key";
 
     String TD_LOGGER_API_SERVER_HOST = "td.logger.api.server.host";
