@@ -69,7 +69,7 @@ To install td-logger From SBT (a build tool for Scala), please add the following
     )
     // Dependencies
     libraryDependencies ++= Seq(
-      "com.treasure_data" % "td-logger" % "0.1.0"
+      "com.treasure_data" % "td-logger" % "0.1.1"
     )
 
 ### Install from GitHub repository
@@ -85,7 +85,7 @@ directory.  File name will be td-logger-${logger.version}-jar-with-dependencies.
 For more detail, see pom.xml.
 
 **Replace ${logger.version} with the current version of TD Logger for Java.**
-**The current version is 0.1.0.**  
+**The current version is 0.1.1.**
 
 ## Quickstart
 
