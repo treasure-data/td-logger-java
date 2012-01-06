@@ -55,7 +55,7 @@ You can configure your pom.xml as follows to use it:
         <name>Fluentd's Maven2 Repository</name>
         <url>http://fluentd.org/maven2</url>
       </repository>
-    <repositories>
+    </repositories>
     
 ### Install with SBT (Build tool Scala)
 
