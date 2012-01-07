@@ -69,7 +69,7 @@ To install td-logger From SBT (a build tool for Scala), please add the following
     )
     // Dependencies
     libraryDependencies ++= Seq(
-      "com.treasure_data" % "td-logger" % "0.1.1"
+      "com.treasure_data" % "td-logger" % "${logger.version}"
     )
 
 ### Install from GitHub repository
@@ -84,14 +84,14 @@ You will get the td-logger jar file in td-logger-java/target
 directory.  File name will be td-logger-${logger.version}-jar-with-dependencies.jar.
 For more detail, see pom.xml.
 
-**Replace ${logger.version} with the current version of TD Logger for Java.**
+**Replace ${logger.version} with the current version of Treasure Data Logger for Java.**
 **The current version is 0.1.1.**
 
 ## Quickstart
 
 ### Small example with Treasure Data Logger
 
-The following program is a small example of Treasure Data Logger.
+The following program is a small example of td-logger.
 
     import java.io.IOException;
     import java.util.HashMap;
@@ -106,34 +106,34 @@ The following program is a small example of Treasure Data Logger.
             try {
                 Properties props = System.getProperties();
                 props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
-
-                LOG = TreasureDataLogger.getLogger("mydatabase");
+                LOG = TreasureDataLogger.getLogger("my_database");
             } catch (IOException e) {
                 // do something
             }
         }
 
         public void doApp() {
-
             Map<String, Object> data = new HashMap<String, Object>();
             data.put("from", "userA");
             data.put("to", "userB");
-            LOG.log("follow_table", data);
-
+            LOG.log("my_follow_table", data);
         }
     }
 
-See static initializer in Main class.  To create TreasureDataLogger instances,
-you need to invoke getLogger method in TreasureDataLogger class like well-known
-logging libraries.  The method should be called only once.
+See static initializer in Main class.  To create TreasureDataLogger objects,
+you need to invoke getLogger method in TreasureDataLogger class like
+well-known logging libraries.  The method should be called only once.
 
 Close method in TreasureDataLogger class should be called explicitly when 
-application is finished.
+your application is finished (or undeployed).  Once the method is executed,
+all TreasureDataLogger objects that you created are closed.
 
     TreasureDataLogger.close();
 
-See doApp method in Main class.  You can upload event logs with log method.
+See doApp method in Main class.  log method enables you to upload event logs.
 Event logs should be declared as variables of Map\<String, Object\> type.
+The key is String type.  The type of value is one of the followings: int,
+long, string, float, double.
 
 ### Direct upload and In-direct upload
 
