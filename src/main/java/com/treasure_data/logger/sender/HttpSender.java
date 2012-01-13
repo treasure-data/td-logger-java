@@ -56,7 +56,7 @@ public class HttpSender implements Sender {
     }
 
     public boolean emit(String tag, Map<String, Object> record) {
-        return emit(tag, System.currentTimeMillis(), record);
+        return emit(tag, System.currentTimeMillis() / 1000, record);
     }
 
     public boolean emit(String tag, long timestamp, Map<String, Object> record) {

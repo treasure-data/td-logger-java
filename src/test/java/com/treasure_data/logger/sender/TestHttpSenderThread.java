@@ -42,7 +42,7 @@ public class TestHttpSenderThread {
         for (int i = 0; i < 1000; ++i) {
             Map<String, Object> data = new HashMap<String, Object>();
             data.put("k:" + i, "v:" + i);
-            data.put("time", System.currentTimeMillis());
+            data.put("time", System.currentTimeMillis() / 1000);
             packer.write(data);
         }
         byte[] bytes = out.toByteArray();
@@ -64,7 +64,7 @@ public class TestHttpSenderThread {
 //        Packer packer = msgpack.createPacker(gzout);
 //      Map<String, Object> data = new HashMap<String, Object>();
 //      data.put("k1", "v1");
-//      data.put("time", System.currentTimeMillis());
+//      data.put("time", System.currentTimeMillis() / 1000);
 //      packer.write(data);
 //        //gzout.finish();
 //        gzout.flush();
