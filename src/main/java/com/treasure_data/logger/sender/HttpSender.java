@@ -134,6 +134,10 @@ public class HttpSender implements Sender {
         return true;
     }
 
+    public void flush() throws IOException {
+        // ignore
+    }
+
     public byte[] getBuffer() { // TODO #MN need the impl. for testing
         throw new UnsupportedOperationException();
     }
