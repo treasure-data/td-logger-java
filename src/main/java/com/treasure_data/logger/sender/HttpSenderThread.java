@@ -24,18 +24,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.treasure_data.logger.Config;
-import com.treasure_data.model.ClientException;
-import com.treasure_data.model.HttpClient;
+import com.treasure_data.client.ClientException;
+import com.treasure_data.client.TreasureDataClient;
+import com.treasure_data.model.Database;
+import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.Table;
-import com.treasure_data.model.TableCollection;
+import com.treasure_data.logger.Config;
+import com.treasure_data.model.DatabaseSummary;
 
 class HttpSenderThread implements Runnable {
     private static Logger LOG = LoggerFactory.getLogger(HttpSenderThread.class);
 
     private LinkedBlockingQueue<QueueEvent> queue;
 
-    private HttpClient client;
+    private TreasureDataClient client;
 
     private AtomicBoolean flushNow = new AtomicBoolean(false);
 
@@ -53,7 +55,7 @@ class HttpSenderThread implements Runnable {
 
     private int errorCount = 0;
 
-    HttpSenderThread(LinkedBlockingQueue<QueueEvent> queue, HttpClient client) {
+    HttpSenderThread(LinkedBlockingQueue<QueueEvent> queue, TreasureDataClient client) {
         this.queue = queue;
         this.client = client;
     }
@@ -131,9 +133,10 @@ class HttpSenderThread implements Runnable {
                             new Object[] { ev.databaseName, ev.tableName, ev.data.length }));
                 }
 
-                Table table = new TableCollection(client, ev.databaseName).get(ev.tableName);
+                Table table = new Table(new Database(ev.databaseName), ev.tableName);
+
                 long time = System.currentTimeMillis();
-                table.importData("msgpack.gz", ev.data);
+                client.importData(table, ev.data);
                 time = System.currentTimeMillis() - time;
 
                 if (LOG.isDebugEnabled()) {
@@ -141,7 +144,7 @@ class HttpSenderThread implements Runnable {
                 }
 
                 retry = false;
-            } catch (ClientException e) { // TODO #MN ClientException?
+            } catch (ClientException e) {
                 if (!Boolean.parseBoolean(System.getProperty(
                         Config.TD_LOGGER_AUTO_CREATE_TABLE, Config.TD_LOGGER_AUTO_CREATE_TABLE_DEFAULT))) {
                     throw e;
@@ -150,10 +153,10 @@ class HttpSenderThread implements Runnable {
                 LOG.info(String.format("Creating table %s.%s on Treasure Data",
                         new Object[] { ev.databaseName, ev.tableName }));
                 try {
-                    client.createLogTable(ev.databaseName, ev.tableName);
+                    client.createTable(ev.databaseName, ev.tableName);
                 } catch (ClientException e0) {
                     client.createDatabase(ev.databaseName);
-                    client.createLogTable(ev.databaseName, ev.tableName);
+                    client.createTable(ev.databaseName, ev.tableName);
                 }
             }
         }

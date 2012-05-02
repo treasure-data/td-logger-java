@@ -19,18 +19,25 @@ package com.treasure_data.logger.sender;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Pattern;
 
 import org.fluentd.logger.sender.Sender;
 import org.msgpack.MessagePack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.treasure_data.model.HttpClient;
+import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.client.TreasureDataClient;
 
 public class HttpSender implements Sender {
     private static Logger LOG = LoggerFactory.getLogger(HttpSender.class);
+
+    private static Pattern databasePat = Pattern.compile("^([a-z0-9_]+)$");
+
+    private static Pattern columnPat = Pattern.compile("^([a-z0-9_]+)$");
 
     private MessagePack msgpack;
 
@@ -48,10 +55,13 @@ public class HttpSender implements Sender {
         if (apiKey == null) {
             throw new IllegalArgumentException("APIKey is required");
         }
+        Properties props = System.getProperties();
         msgpack = new MessagePack();
         chunks = new ConcurrentHashMap<String, ExtendedPacker>();
         queue = new LinkedBlockingQueue<QueueEvent>();
-        senderThread = new HttpSenderThread(queue, new HttpClient(apiKey));
+        // TODO
+        TreasureDataClient client = new TreasureDataClient(new TreasureDataCredentials(apiKey), props);
+        senderThread = new HttpSenderThread(queue, client);
         new Thread(senderThread).start();
     }
 
@@ -75,12 +85,12 @@ public class HttpSender implements Sender {
         String tableName = splited[splited.length - 1];
 
         // validation
-        if (!HttpClient.validateDatabaseName(databaseName)) {
+        if (!validateDatabaseName(databaseName)) {
             String msg = String.format("Invalid database name %s", new Object[] { databaseName });
             LOG.error(msg);
             throw new IllegalArgumentException(msg);
         }
-        if (!HttpClient.validateTableName(tableName)) {
+        if (!validateTableName(tableName)) {
             String msg = String.format("Invalid table name %s", new Object[] { tableName });
             LOG.error(msg);
             throw new IllegalArgumentException(msg);
@@ -160,5 +170,52 @@ public class HttpSender implements Sender {
             }
         }
         senderThread.stop();
+    }
+
+    public static boolean validateDatabaseName(String name) {
+        if (name == null || name.equals("")) {
+            LOG.info(String.format("Empty name is not allowed: %s",
+                    new Object[] { name }));
+            return false;
+        }
+        int len = name.length();
+        if (len < 3 || 32 < len) {
+            LOG.info(String.format("Name must be 3 to 32 characters, got %d characters.",
+                    new Object[] { len }));
+            return false;
+        }
+
+        if (!databasePat.matcher(name).matches()) {
+            LOG.info("Name must consist only of alphabets, numbers, '_'.");
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean validateTableName(String name) {
+        return validateDatabaseName(name);
+    }
+
+    public boolean validateColumnName(String name) {
+        if (name == null || name.equals("")) {
+            LOG.info(String.format("Empty column name is not allowed: %s",
+                    new Object[] { name }));
+            return false;
+        }
+
+        int len = name.length();
+        if (32 < len) {
+            LOG.info(String.format("Column name must be to 32 characters, got %d characters.",
+                    new Object[] { len }));
+            return false;
+        }
+
+        if (!columnPat.matcher(name).matches()) {
+            LOG.info("Column name must consist only of alphabets, numbers, '_'.");
+            return false;
+        }
+
+        return true;
     }
 }
