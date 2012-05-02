@@ -31,7 +31,7 @@ public class TestTDLoggerAgentNormalOperation {
         props.setProperty(Config.TD_LOGGER_AGENTMODE, "true");
     }
 
-    @Test
+    @Test @Ignore
     public void testNormal01() throws Exception {
         Properties props = System.getProperties();
         int port = Integer.parseInt(props.getProperty(

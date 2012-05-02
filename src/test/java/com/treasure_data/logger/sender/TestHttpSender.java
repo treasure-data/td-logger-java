@@ -18,7 +18,7 @@ public class TestHttpSender {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
-    @Test
+    @Test @Ignore
     public void testEmit() throws Exception {
         Properties props = System.getProperties();
         String host = props.getProperty(
