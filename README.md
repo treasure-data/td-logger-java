@@ -85,7 +85,7 @@ directory.  File name will be td-logger-${logger.version}-jar-with-dependencies.
 For more detail, see pom.xml.
 
 **Replace ${logger.version} with the current version of Treasure Data Logger for Java.**
-**The current version is 0.1.2.**
+**The current version is 0.1.3.**
 
 ## Quickstart
 
