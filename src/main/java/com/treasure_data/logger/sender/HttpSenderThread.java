@@ -27,10 +27,8 @@ import org.slf4j.LoggerFactory;
 import com.treasure_data.client.ClientException;
 import com.treasure_data.client.TreasureDataClient;
 import com.treasure_data.model.Database;
-import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.Table;
 import com.treasure_data.logger.Config;
-import com.treasure_data.model.DatabaseSummary;
 
 class HttpSenderThread implements Runnable {
     private static Logger LOG = LoggerFactory.getLogger(HttpSenderThread.class);

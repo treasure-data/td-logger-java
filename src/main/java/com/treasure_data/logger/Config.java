@@ -17,40 +17,6 @@
 //
 package com.treasure_data.logger;
 
-public interface Config {
-    String TD_LOGGER_AGENTMODE = "td.logger.agentmode";
+public class Config extends com.treasure_data.client.Config implements Constants {
 
-    String TD_LOGGER_AGENTMODE_DEFAULT = "true";
-
-    String TD_LOGGER_AGENT_HOST = "td.logger.agent.host";
-
-    String TD_LOGGER_AGENT_HOST_DEFAULT = "localhost";
-
-    String TD_LOGGER_AGENT_PORT = "td.logger.agent.port";
-
-    String TD_LOGGER_AGENT_PORT_DEFAULT = "24224";
-
-    String TD_LOGGER_AGENT_TIMEOUT = "td.logger.agent.timeout";
-
-    String TD_LOGGER_AGENT_TIMEOUT_DEFAULT = "3000";
-
-    String TD_LOGGER_AGENT_BUFCAPACITY = "td.logger.agent.buffercapacity";
-
-    String TD_LOGGER_AGENT_BUFCAPACITY_DEFAULT = "1048576"; // 1 * 1024 * 1024
-
-    String TD_ENV_API_KEY = "TREASURE_DATA_API_KEY";
-
-    String TD_LOGGER_API_KEY = "td.logger.api.key";
-
-    String TD_LOGGER_API_SERVER_HOST = "td.logger.api.server.host";
-
-    String TD_LOGGER_API_SERVER_HOST_DEFAULT = "api.treasure-data.com";
-
-    String TD_LOGGER_API_SERVER_PORT = "td.logger.api.server.port";
-
-    String TD_LOGGER_API_SERVER_PORT_DEFAULT = "80";
-
-    String TD_LOGGER_AUTO_CREATE_TABLE = "td.logger.create.table.auto";
-
-    String TD_LOGGER_AUTO_CREATE_TABLE_DEFAULT = "false";
 }

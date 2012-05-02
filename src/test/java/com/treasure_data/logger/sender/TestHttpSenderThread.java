@@ -20,58 +20,36 @@ import com.treasure_data.logger.Config;
 
 public class TestHttpSenderThread {
 
-    private MessagePack msgpack = new MessagePack();
-
     @Before
     public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
-    @Ignore @Test
+    @Test @Ignore
     public void testUploadEvent() throws Exception {
         Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        MessagePack msgpack = new MessagePack();
+
         String apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
         TreasureDataClient client = new TreasureDataClient(
                 new TreasureDataCredentials(apiKey), props);
         HttpSenderThread thread = new HttpSenderThread(null, client);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Packer packer = msgpack.createPacker(out);
-        for (int i = 0; i < 1000; ++i) {
+        GZIPOutputStream gzout = new GZIPOutputStream(out);
+        Packer packer = msgpack.createPacker(gzout);
+        for (int i = 0; i < 10; ++i) {
             Map<String, Object> data = new HashMap<String, Object>();
             data.put("k:" + i, "v:" + i);
             data.put("time", System.currentTimeMillis() / 1000);
             packer.write(data);
         }
+        gzout.finish();
         byte[] bytes = out.toByteArray();
         System.out.println(bytes.length);
 
-        ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-        //FileOutputStream out2 = new FileOutputStream("msgpack.gz");
-        GZIPOutputStream gzout = new GZIPOutputStream(out2);
-        gzout.write(bytes);
-        gzout.finish();
-        byte[] bytes2 = out2.toByteArray();
-        System.out.println(bytes2.length);
-        QueueEvent ev = new QueueEvent("mugatest", "table1", bytes2);
+        QueueEvent ev = new QueueEvent("mugadb", "loggertable", bytes);
         thread.uploadEvent(ev);
 
-//        ByteArrayOutputStream out = new ByteArrayOutputStream();
-//        //FileOutputStream out = new FileOutputStream("msgpack.gz");
-//        GZIPOutputStream gzout = new GZIPOutputStream(out);
-//        Packer packer = msgpack.createPacker(gzout);
-//      Map<String, Object> data = new HashMap<String, Object>();
-//      data.put("k1", "v1");
-//      data.put("time", System.currentTimeMillis() / 1000);
-//      packer.write(data);
-//        //gzout.finish();
-//        gzout.flush();
-//        //out.flush();
-//
-//        byte[] bytes = out.toByteArray();
-//        gzout.close();
-//        QueueEvent ev = new QueueEvent("mugatest", "table1", bytes);
-//        thread.uploadEvent(ev);
     }
 }
