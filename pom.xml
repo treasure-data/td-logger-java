@@ -71,17 +71,17 @@
     <dependency>
       <groupId>org.fluentd</groupId>
       <artifactId>fluent-logger</artifactId>
-      <version>0.2.3</version>
+      <version>0.2.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.treasure_data</groupId>
       <artifactId>td-client</artifactId>
-      <version>0.1.0</version>
+      <version>0.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.msgpack</groupId>
       <artifactId>msgpack</artifactId>
-      <version>0.6.4</version>
+      <version>0.6.6</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
