@@ -160,10 +160,13 @@ class HttpSenderThread implements Runnable {
         }
     }
 
+    synchronized void flush() {
+        flushNow.set(true);
+        tryFlush();
+    }
+
     synchronized void stop() {
         finished.set(true);
-        flushNow.set(true);
-
-        tryFlush();
+        flush();
     }
 }

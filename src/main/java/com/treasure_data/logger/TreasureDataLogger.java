@@ -106,7 +106,7 @@ public class TreasureDataLogger extends FluentLogger {
 
     public static synchronized void close() {
         for (Map.Entry<String, TreasureDataLogger> e : loggers.entrySet()) {
-            LOG.info(String.format("Closes logger(%s)", new Object[] { e.getKey() }));
+            LOG.info(String.format("Closes logger(%s)", e.getKey()));
             e.getValue().close0();
         }
     }
@@ -138,6 +138,11 @@ public class TreasureDataLogger extends FluentLogger {
     @Override
     protected void close0() {
         super.close0();
+    }
+
+    @Override
+    public void flush() {
+        super.flush();
     }
 
     @Override

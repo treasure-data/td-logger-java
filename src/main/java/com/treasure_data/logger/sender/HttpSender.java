@@ -59,7 +59,6 @@ public class HttpSender implements Sender {
         msgpack = new MessagePack();
         chunks = new ConcurrentHashMap<String, ExtendedPacker>();
         queue = new LinkedBlockingQueue<QueueEvent>();
-        // TODO
         TreasureDataClient client = new TreasureDataClient(new TreasureDataCredentials(apiKey), props);
         senderThread = new HttpSenderThread(queue, client);
         new Thread(senderThread).start();
@@ -144,15 +143,21 @@ public class HttpSender implements Sender {
         return true;
     }
 
-    public void flush() throws IOException {
-        // ignore
-    }
-
     public byte[] getBuffer() { // TODO #MN need the impl. for testing
         throw new UnsupportedOperationException();
     }
 
-    public void close() {
+    public void flush() {
+        try {
+            flush0();
+        } catch (IOException e) {
+            // ignore
+        } finally {
+            senderThread.flush();
+        }
+    }
+
+    private void flush0() throws IOException {
         if (!chunks.isEmpty()) {
             for (Map.Entry<String, ExtendedPacker> entry : chunks.entrySet()) {
                 String[] splited = entry.getKey().split("\\.");
@@ -169,7 +174,17 @@ public class HttpSender implements Sender {
                 }
             }
         }
-        senderThread.stop();
+        senderThread.flush();
+    }
+
+    public void close() {
+        try {
+            flush0();
+        } catch (IOException e) {
+            // ignore
+        } finally {
+            senderThread.stop();
+        }
     }
 
     public static boolean validateDatabaseName(String name) {
