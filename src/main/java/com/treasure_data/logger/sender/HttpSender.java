@@ -39,6 +39,53 @@ public class HttpSender implements Sender {
 
     private static Pattern columnPat = Pattern.compile("^([a-z0-9_]+)$");
 
+    public static boolean validateDatabaseName(String name) {
+        if (name == null || name.equals("")) {
+            LOG.info(String.format("Empty name is not allowed: %s",
+                    new Object[] { name }));
+            return false;
+        }
+        int len = name.length();
+        if (len < 3 || 32 < len) {
+            LOG.info(String.format("Name must be 3 to 32 characters, got %d characters.",
+                    new Object[] { len }));
+            return false;
+        }
+
+        if (!databasePat.matcher(name).matches()) {
+            LOG.info("Name must consist only of alphabets, numbers, '_'.");
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean validateTableName(String name) {
+        return validateDatabaseName(name);
+    }
+
+    public static boolean validateColumnName(String name) {
+        if (name == null || name.equals("")) {
+            LOG.info(String.format("Empty column name is not allowed: %s",
+                    new Object[] { name }));
+            return false;
+        }
+
+        int len = name.length();
+        if (32 < len) {
+            LOG.info(String.format("Column name must be to 32 characters, got %d characters.",
+                    new Object[] { len }));
+            return false;
+        }
+
+        if (!columnPat.matcher(name).matches()) {
+            LOG.info("Column name must consist only of alphabets, numbers, '_'.");
+            return false;
+        }
+
+        return true;
+    }
+
     private MessagePack msgpack;
 
     private Map<String, ExtendedPacker> chunks;
@@ -51,6 +98,8 @@ public class HttpSender implements Sender {
 
     private HttpSenderThread senderThread;
 
+    private String name;
+
     public HttpSender(final String host, final int port, final String apiKey) {
         if (apiKey == null) {
             throw new IllegalArgumentException("APIKey is required");
@@ -62,6 +111,7 @@ public class HttpSender implements Sender {
         TreasureDataClient client = new TreasureDataClient(new TreasureDataCredentials(apiKey), props);
         senderThread = new HttpSenderThread(queue, client);
         new Thread(senderThread).start();
+        name = String.format("%s_%d", host, port);
     }
 
     public boolean emit(String tag, Map<String, Object> record) {
@@ -187,50 +237,14 @@ public class HttpSender implements Sender {
         }
     }
 
-    public static boolean validateDatabaseName(String name) {
-        if (name == null || name.equals("")) {
-            LOG.info(String.format("Empty name is not allowed: %s",
-                    new Object[] { name }));
-            return false;
-        }
-        int len = name.length();
-        if (len < 3 || 32 < len) {
-            LOG.info(String.format("Name must be 3 to 32 characters, got %d characters.",
-                    new Object[] { len }));
-            return false;
-        }
-
-        if (!databasePat.matcher(name).matches()) {
-            LOG.info("Name must consist only of alphabets, numbers, '_'.");
-            return false;
-        }
-
-        return true;
+    @Override
+    public String getName() {
+        return name;
     }
 
-    public static boolean validateTableName(String name) {
-        return validateDatabaseName(name);
+    @Override
+    public String toString() {
+        return getName();
     }
 
-    public boolean validateColumnName(String name) {
-        if (name == null || name.equals("")) {
-            LOG.info(String.format("Empty column name is not allowed: %s",
-                    new Object[] { name }));
-            return false;
-        }
-
-        int len = name.length();
-        if (32 < len) {
-            LOG.info(String.format("Column name must be to 32 characters, got %d characters.",
-                    new Object[] { len }));
-            return false;
-        }
-
-        if (!columnPat.matcher(name).matches()) {
-            LOG.info("Column name must consist only of alphabets, numbers, '_'.");
-            return false;
-        }
-
-        return true;
-    }
 }
