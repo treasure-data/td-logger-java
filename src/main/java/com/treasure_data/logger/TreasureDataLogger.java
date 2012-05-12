@@ -111,6 +111,13 @@ public class TreasureDataLogger extends FluentLogger {
         }
     }
 
+    public static synchronized void flushAll() {
+        for (Map.Entry<String, TreasureDataLogger> e : loggers.entrySet()) {
+            LOG.info(String.format("Flushes logger(%s)", e.getKey()));
+            e.getValue().flush();
+        }
+    }
+
     protected TreasureDataLogger(String database, Sender sender) {
         super(database, sender);
     }

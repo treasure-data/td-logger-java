@@ -31,6 +31,6 @@ public class TestTDLoggerNonAgentNormalOperation {
         }
 
         logger.flush();
-        TreasureDataLogger.close();
+        TreasureDataLogger.closeAll();
     }
 }
