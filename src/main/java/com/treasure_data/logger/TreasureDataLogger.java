@@ -33,14 +33,16 @@ public class TreasureDataLogger extends FluentLogger {
 
     private static Logger LOG = LoggerFactory.getLogger(TreasureDataLogger.class);
 
-    private static Map<String, TreasureDataLogger> loggers = new WeakHashMap<String, TreasureDataLogger>();
+    private static Map<String, TreasureDataLogger> loggers =
+        new WeakHashMap<String, TreasureDataLogger>();
 
     public static TreasureDataLogger getLogger(String database) {
         Properties props = System.getProperties();
         return getLogger(database, props);
     }
 
-    public static synchronized TreasureDataLogger getLogger(String database, Properties props) {
+    public static synchronized TreasureDataLogger getLogger(
+            String database, Properties props) {
         if (database == null || database.equals("")) {
             throw new NullPointerException(
                     "Cannot specify null or null charactor as value of database");
@@ -50,7 +52,8 @@ public class TreasureDataLogger extends FluentLogger {
         int port, timeout = 0, bufferCapacity = 0;
 
         boolean agentMode = Boolean.parseBoolean(props.getProperty(
-                Config.TD_LOGGER_AGENTMODE, Config.TD_LOGGER_AGENTMODE_DEFAULT));
+                Config.TD_LOGGER_AGENTMODE,
+                Config.TD_LOGGER_AGENTMODE_DEFAULT));
 
         apiKey = System.getenv(Config.TD_ENV_API_KEY);
         if (apiKey != null && !apiKey.equals("")) {
@@ -62,58 +65,62 @@ public class TreasureDataLogger extends FluentLogger {
                 apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
             }
             if (apiKey == null) {
-                throw new IllegalArgumentException(
-                        String.format("APIKey option is required as java property: %s",
-                                new Object[] { Config.TD_LOGGER_API_KEY }));
+                throw new IllegalArgumentException(String.format(
+                        "APIKey option is required as java property: %s",
+                        Config.TD_LOGGER_API_KEY));
             }
             host = props.getProperty(
-                    Config.TD_LOGGER_API_SERVER_HOST, Config.TD_LOGGER_API_SERVER_HOST_DEFAULT);
+                    Config.TD_LOGGER_API_SERVER_HOST,
+                    Config.TD_LOGGER_API_SERVER_HOST_DEFAULT);
             port = Integer.parseInt(props.getProperty(
-                    Config.TD_LOGGER_API_SERVER_PORT, Config.TD_LOGGER_API_SERVER_PORT_DEFAULT));
-            key = String.format("%s_%s_%s_%d", new Object[] { database, apiKey, host, port });
+                    Config.TD_LOGGER_API_SERVER_PORT,
+                    Config.TD_LOGGER_API_SERVER_PORT_DEFAULT));
+            key = String.format("%s_%s_%s_%d", database, apiKey, host, port);
         } else {
             host = props.getProperty(
-                    Config.TD_LOGGER_AGENT_HOST, Config.TD_LOGGER_AGENT_HOST_DEFAULT);
+                    Config.TD_LOGGER_AGENT_HOST,
+                    Config.TD_LOGGER_AGENT_HOST_DEFAULT);
             port = Integer.parseInt(props.getProperty(
-                    Config.TD_LOGGER_AGENT_PORT, Config.TD_LOGGER_AGENT_PORT_DEFAULT));
+                    Config.TD_LOGGER_AGENT_PORT,
+                    Config.TD_LOGGER_AGENT_PORT_DEFAULT));
             timeout = Integer.parseInt(props.getProperty(
-                    Config.TD_LOGGER_AGENT_TIMEOUT, Config.TD_LOGGER_AGENT_TIMEOUT_DEFAULT));
+                    Config.TD_LOGGER_AGENT_TIMEOUT,
+                    Config.TD_LOGGER_AGENT_TIMEOUT_DEFAULT));
             bufferCapacity = Integer.parseInt(props.getProperty(
-                    Config.TD_LOGGER_AGENT_BUFCAPACITY, Config.TD_LOGGER_AGENT_BUFCAPACITY_DEFAULT));
-            key = String.format("%s_%s_%d_%d_%d",
-                    new Object[] { database, host, port, timeout, bufferCapacity });
+                    Config.TD_LOGGER_AGENT_BUFCAPACITY,
+                    Config.TD_LOGGER_AGENT_BUFCAPACITY_DEFAULT));
+            key = String.format("%s_%s_%d_%d_%d", database, host, port, timeout, bufferCapacity);
         }
 
         if (loggers.containsKey(key)) {
             return loggers.get(key);
-        } else {
-            // create logger object
-            LOG.info(String.format("Creates logger(%s)", new Object[] { key }));
-            TreasureDataLogger logger;
-            if (!agentMode) {
-                // connected to TD platform directly
-                logger = new TreasureDataLogger(database,
-                        new HttpSender(host, port, apiKey));
-            } else {
-                // agent mode is connected to specified fluentd
-                logger = new TreasureDataLogger(database,
-                        new RawSocketSender(host, port, timeout, bufferCapacity));
-            }
-            loggers.put(key, logger);
-            return logger;
         }
+
+        // create logger object
+        LOG.info(String.format("Creates logger(%s)", key));
+        TreasureDataLogger logger;
+        if (!agentMode) {
+            // connected to TD platform directly
+            logger = new TreasureDataLogger(database, new HttpSender(host, port, apiKey));
+        } else {
+            // agent mode is connected to specified fluentd
+            logger = new TreasureDataLogger(database,
+                    new RawSocketSender(host, port, timeout, bufferCapacity));
+        }
+        loggers.put(key, logger);
+        return logger;
     }
 
     public static synchronized void closeAll() {
         for (Map.Entry<String, TreasureDataLogger> e : loggers.entrySet()) {
-            LOG.info(String.format("Closes logger(%s)", e.getKey()));
+            LOG.info(String.format("Close logger(%s)", e.getKey()));
             e.getValue().close();
         }
     }
 
     public static synchronized void flushAll() {
         for (Map.Entry<String, TreasureDataLogger> e : loggers.entrySet()) {
-            LOG.info(String.format("Flushes logger(%s)", e.getKey()));
+            LOG.info(String.format("Flush logger(%s)", e.getKey()));
             e.getValue().flush();
         }
     }
