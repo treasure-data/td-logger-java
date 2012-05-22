@@ -22,16 +22,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
 import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
 import org.msgpack.template.Templates;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class ExtendedPacker {
-    private static Logger LOG = LoggerFactory.getLogger(ExtendedPacker.class);
+    private static Logger LOG = Logger.getLogger(ExtendedPacker.class.getName());
 
     private static int keySoftLimit = 256;
 
@@ -59,10 +58,10 @@ class ExtendedPacker {
                 if (!keys.contains(key)) {
                     keys.add(key);
                     if (keys.size() == keySoftLimit) {
-                        LOG.warn("Went over soft limit of record keys");
+                        LOG.warning("Went over soft limit of record keys");
                     } else if (keys.size() == keyHardLimit) {
                         String msg = "Went over hard limit of record keys";
-                        LOG.error(msg);
+                        LOG.severe("Went over soft limit of record keys");
                         throw new IllegalStateException(msg);
                     }
                 }

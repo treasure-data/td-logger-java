@@ -22,18 +22,18 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import org.fluentd.logger.sender.Sender;
 import org.msgpack.MessagePack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.TreasureDataClient;
 
 public class HttpSender implements Sender {
-    private static Logger LOG = LoggerFactory.getLogger(HttpSender.class);
+    private static Logger LOG = Logger.getLogger(HttpSender.class.getName());
 
     private static Pattern databasePat = Pattern.compile("^([a-z0-9_]+)$");
 
@@ -124,8 +124,8 @@ public class HttpSender implements Sender {
     }
 
     private boolean emit0(String tag, Map<String, Object> record) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(String.format("Emit event{tag=%s,record=%s}",
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.fine(String.format("Emit event{tag=%s,record=%s}",
                     new Object[] { tag, record.toString() }));
         }
 
@@ -136,18 +136,18 @@ public class HttpSender implements Sender {
         // validation
         if (!validateDatabaseName(databaseName)) {
             String msg = String.format("Invalid database name %s", new Object[] { databaseName });
-            LOG.error(msg);
+            LOG.severe(msg);
             throw new IllegalArgumentException(msg);
         }
         if (!validateTableName(tableName)) {
             String msg = String.format("Invalid table name %s", new Object[] { tableName });
-            LOG.error(msg);
+            LOG.severe(msg);
             throw new IllegalArgumentException(msg);
         }
 
         // check queue limit
         if (queue.size() > queueLimit) {
-            LOG.error("queue length exceeds limit. cannot add new event log");
+            LOG.severe("queue length exceeds limit. cannot add new event log");
             return false;
         }
 
@@ -158,7 +158,8 @@ public class HttpSender implements Sender {
                 packer = new ExtendedPacker(msgpack);
                 chunks.put(key, packer);
             } catch (IOException e) {
-                LOG.error("Cannot create packer object", e);
+                LOG.severe("Cannot create packer object");
+                LOG.throwing(this.getClass().getName(), "emit0", e);
                 return false;
             }
         } else {
@@ -169,8 +170,8 @@ public class HttpSender implements Sender {
         try {
             packer.write(record);
         } catch (Exception e) {
-            LOG.error(String.format("Cannot serialize data to %s.%s",
-                    new Object[] { databaseName, tableName }), e);
+            LOG.severe(String.format("Cannot serialize data to %s.%s",
+                    databaseName, tableName));
             chunks.remove(key);
             return false;
         }
@@ -179,13 +180,13 @@ public class HttpSender implements Sender {
             try {
                 queue.put(new QueueEvent(databaseName, tableName, packer.getByteArray()));
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(String.format("Put event on queue (size: %d)",
+                if (LOG.isLoggable(Level.FINE)) {
+                    LOG.fine(String.format("Put event on queue (size: %d)",
                             new Object[] { queue.size() }));
                 }
             } catch (InterruptedException e) { // ignore
             } catch (IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.throwing(this.getClass().getName(), "emit0", e);
             } finally {
                 chunks.remove(key);
             }
@@ -220,7 +221,7 @@ public class HttpSender implements Sender {
                     } catch (InterruptedException e) { // ignore
                     }
                 } catch (IOException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.throwing(this.getClass().getName(), "flush0", e);
                 }
             }
         }

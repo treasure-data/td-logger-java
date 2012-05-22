@@ -20,9 +20,8 @@ package com.treasure_data.logger.sender;
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.treasure_data.client.ClientException;
 import com.treasure_data.client.TreasureDataClient;
@@ -31,7 +30,7 @@ import com.treasure_data.model.Table;
 import com.treasure_data.logger.Config;
 
 class HttpSenderThread implements Runnable {
-    private static Logger LOG = LoggerFactory.getLogger(HttpSenderThread.class);
+    private static Logger LOG = Logger.getLogger(HttpSenderThread.class.getName());
 
     private LinkedBlockingQueue<QueueEvent> queue;
 
@@ -99,19 +98,20 @@ class HttpSenderThread implements Runnable {
             try {
                 QueueEvent ev = queue.take();
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(String.format("Toke event from queue (size: %d)",
-                            new Object[] { queue.size() }));
+                if (LOG.isLoggable(Level.FINE)) {
+                    LOG.fine(String.format("Toke event from queue (size: %d)", queue.size()));
                 }
 
                 uploadEvent(ev);
                 flushed = true;
             } catch (Exception e) {
                 if (errorCount < retryLimit) {
-                    LOG.error("Failed to upload event logs to Treasure Data, retrying", e);
+                    LOG.severe("Failed to upload event logs to Treasure Data, retrying");
+                    LOG.throwing(this.getClass().getName(), "tryFlush", e);
                     errorCount += 1;
                 } else {
-                    LOG.error("Failed to upload event logs to Treasure Data, trashed", e);
+                    LOG.severe("Failed to upload event logs to Treasure Data, trashed");
+                    LOG.throwing(this.getClass().getName(), "tryFlush", e);
                     errorCount = 0;
                     queue.clear();
                 }
@@ -125,10 +125,10 @@ class HttpSenderThread implements Runnable {
         boolean retry = true;
         while (retry) {
             try {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(String.format(
+                if (LOG.isLoggable(Level.FINE)) {
+                    LOG.fine(String.format(
                             "Uploading event logs to %s.%s table on Treasure Data (%d bytes)",
-                            new Object[] { ev.databaseName, ev.tableName, ev.data.length }));
+                            ev.databaseName, ev.tableName, ev.data.length));
                 }
 
                 Table table = new Table(new Database(ev.databaseName), ev.tableName);
@@ -137,8 +137,8 @@ class HttpSenderThread implements Runnable {
                 client.importData(table, ev.data);
                 time = System.currentTimeMillis() - time;
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(String.format("Uploaded in %d sec.", new Object[] { time } ));
+                if (LOG.isLoggable(Level.FINE)) {
+                    LOG.fine(String.format("Uploaded in %d sec.", time));
                 }
 
                 retry = false;

@@ -2,10 +2,12 @@ package com.treasure_data.logger.sender;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.junit.Before;
@@ -13,6 +15,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
+import org.msgpack.unpacker.Unpacker;
+import org.msgpack.unpacker.UnpackerIterator;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.TreasureDataClient;
@@ -38,9 +42,9 @@ public class TestHttpSenderThread {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         GZIPOutputStream gzout = new GZIPOutputStream(out);
         Packer packer = msgpack.createPacker(gzout);
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 20; ++i) {
             Map<String, Object> data = new HashMap<String, Object>();
-            data.put("k:" + i, "v:" + i);
+            data.put("k", i);
             data.put("time", System.currentTimeMillis() / 1000);
             packer.write(data);
         }
@@ -48,8 +52,7 @@ public class TestHttpSenderThread {
         byte[] bytes = out.toByteArray();
         System.out.println(bytes.length);
 
-        QueueEvent ev = new QueueEvent("mugadb", "loggertable", bytes);
+        QueueEvent ev = new QueueEvent("mugadb", "table01", bytes);
         thread.uploadEvent(ev);
-
     }
 }

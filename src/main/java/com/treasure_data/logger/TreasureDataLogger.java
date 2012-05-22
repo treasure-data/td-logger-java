@@ -20,18 +20,17 @@ package com.treasure_data.logger;
 import java.util.Map;
 import java.util.Properties;
 import java.util.WeakHashMap;
+import java.util.logging.Logger;
 
 import org.fluentd.logger.FluentLogger;
 import org.fluentd.logger.sender.RawSocketSender;
 import org.fluentd.logger.sender.Sender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.treasure_data.logger.sender.HttpSender;
 
 public class TreasureDataLogger extends FluentLogger {
 
-    private static Logger LOG = LoggerFactory.getLogger(TreasureDataLogger.class);
+    private static Logger LOG = Logger.getLogger(TreasureDataLogger.class.getName());
 
     private static Map<String, TreasureDataLogger> loggers =
         new WeakHashMap<String, TreasureDataLogger>();
