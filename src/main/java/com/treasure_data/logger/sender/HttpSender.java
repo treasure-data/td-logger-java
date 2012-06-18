@@ -92,7 +92,7 @@ public class HttpSender implements Sender {
 
     private int chunkLimit = 8 * 1024 * 1024; // 8MB
 
-    private LinkedBlockingQueue<QueueEvent> queue;
+    LinkedBlockingQueue<QueueEvent> queue;
 
     private int queueLimit = 50;
 
@@ -109,9 +109,15 @@ public class HttpSender implements Sender {
         chunks = new ConcurrentHashMap<String, ExtendedPacker>();
         queue = new LinkedBlockingQueue<QueueEvent>();
         TreasureDataClient client = new TreasureDataClient(new TreasureDataCredentials(apiKey), props);
-        senderThread = new HttpSenderThread(queue, client);
+        senderThread = new HttpSenderThread(this, client);
         new Thread(senderThread).start();
         name = String.format("%s_%d", host, port);
+    }
+
+    private synchronized Map<String, ExtendedPacker> recreateChunks() {
+        Map<String, ExtendedPacker> tmp = chunks;
+        chunks = new ConcurrentHashMap<String, ExtendedPacker>();
+        return tmp;
     }
 
     public boolean emit(String tag, Map<String, Object> record) {
@@ -153,17 +159,12 @@ public class HttpSender implements Sender {
 
         String key = databaseName + "." + tableName;
         ExtendedPacker packer = null;
-        if (!chunks.containsKey(key)) {
-            try {
-                packer = new ExtendedPacker(msgpack);
-                chunks.put(key, packer);
-            } catch (IOException e) {
-                LOG.severe("Cannot create packer object");
-                LOG.throwing(this.getClass().getName(), "emit0", e);
-                return false;
-            }
-        } else {
-            packer = chunks.get(key);
+        try {
+            packer = getPacker(key);
+        } catch (IOException e) {
+            LOG.severe("Cannot create packer object");
+            LOG.throwing(this.getClass().getName(), "emit0", e);
+            return false;
         }
 
         // write data to chunk
@@ -194,13 +195,24 @@ public class HttpSender implements Sender {
         return true;
     }
 
+    private synchronized ExtendedPacker getPacker(String key) throws IOException {
+        ExtendedPacker packer = null;
+        if (!chunks.containsKey(key)) {
+            packer = new ExtendedPacker(msgpack);
+            chunks.put(key, packer);
+        } else {
+            packer = chunks.get(key);
+        }
+        return packer;
+    }
+
     public byte[] getBuffer() { // TODO #MN need the impl. for testing
         throw new UnsupportedOperationException();
     }
 
     public void flush() {
         try {
-            flush0();
+            flush0(false);
         } catch (IOException e) {
             // ignore
         } finally {
@@ -208,9 +220,20 @@ public class HttpSender implements Sender {
         }
     }
 
-    private void flush0() throws IOException {
+    public void close() {
+        try {
+            flush0(false);
+        } catch (IOException e) {
+            // ignore
+        } finally {
+            senderThread.stop();
+        }
+    }
+
+    synchronized void flush0(boolean isThread) throws IOException {
         if (!chunks.isEmpty()) {
-            for (Map.Entry<String, ExtendedPacker> entry : chunks.entrySet()) {
+            Map<String, ExtendedPacker> chunks0 = recreateChunks();
+            for (Map.Entry<String, ExtendedPacker> entry : chunks0.entrySet()) {
                 String[] splited = entry.getKey().split("\\.");
                 String databaseName = splited[0];
                 String tableName = splited[1];
@@ -221,20 +244,12 @@ public class HttpSender implements Sender {
                     } catch (InterruptedException e) { // ignore
                     }
                 } catch (IOException e) {
-                    LOG.throwing(this.getClass().getName(), "flush0", e);
+                    LOG.throwing(this.getClass().getName(), "flushChunks", e);
                 }
             }
         }
-        senderThread.flush();
-    }
-
-    public void close() {
-        try {
-            flush0();
-        } catch (IOException e) {
-            // ignore
-        } finally {
-            senderThread.stop();
+        if (!isThread) {
+            senderThread.flush();
         }
     }
 

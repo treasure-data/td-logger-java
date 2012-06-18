@@ -18,6 +18,7 @@
 package com.treasure_data.logger.sender;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -32,7 +33,7 @@ import com.treasure_data.logger.Config;
 class HttpSenderThread implements Runnable {
     private static Logger LOG = Logger.getLogger(HttpSenderThread.class.getName());
 
-    private LinkedBlockingQueue<QueueEvent> queue;
+    private HttpSender sender;
 
     private TreasureDataClient client;
 
@@ -52,8 +53,8 @@ class HttpSenderThread implements Runnable {
 
     private int errorCount = 0;
 
-    HttpSenderThread(LinkedBlockingQueue<QueueEvent> queue, TreasureDataClient client) {
-        this.queue = queue;
+    HttpSenderThread(HttpSender sender, TreasureDataClient client) {
+        this.sender = sender;
         this.client = client;
     }
 
@@ -92,14 +93,25 @@ class HttpSenderThread implements Runnable {
     }
 
     boolean tryFlush() {
+        // buffer is stored on queue
+        if (sender.queue.isEmpty()) {
+            try {
+                sender.flush0(true);
+            } catch (IOException e) {
+                LOG.severe("Failed to store event logs on queue, trashed");
+                LOG.throwing(this.getClass().getName(), "tryFlush", e);
+            }
+        }
+
         boolean flushed = false;
 
-        while (!queue.isEmpty()) {
+        // data stored on queue is flushed
+        while (!sender.queue.isEmpty()) {
             try {
-                QueueEvent ev = queue.take();
+                QueueEvent ev = sender.queue.take();
 
                 if (LOG.isLoggable(Level.FINE)) {
-                    LOG.fine(String.format("Toke event from queue (size: %d)", queue.size()));
+                    LOG.fine(String.format("Toke event from queue (size: %d)", sender.queue.size()));
                 }
 
                 uploadEvent(ev);
@@ -113,7 +125,7 @@ class HttpSenderThread implements Runnable {
                     LOG.severe("Failed to upload event logs to Treasure Data, trashed");
                     LOG.throwing(this.getClass().getName(), "tryFlush", e);
                     errorCount = 0;
-                    queue.clear();
+                    sender.queue.clear();
                 }
             }
         }
