@@ -16,7 +16,7 @@ public class TestTDLoggerNonAgentNormalOperation {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
-    @Test
+    @Test @Ignore
     public void testNormal01() throws Exception {
         Properties props = System.getProperties();
         props.setProperty(Config.TD_LOGGER_AGENTMODE, "false");
