@@ -48,7 +48,7 @@ You can configure your pom.xml as follows to use it:
       <repository>
         <id>treasure-data.com</id>
         <name>Treasure Data's Maven2 Repository</name>
-        <url>http://treasure-data.com/maven2</url>
+        <url>http://maven.treasure-data.com/maven2</url>
       </repository>
       <repository>
         <id>fluentd.org</id>
