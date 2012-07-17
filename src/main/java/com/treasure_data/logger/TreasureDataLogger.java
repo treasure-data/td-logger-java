@@ -47,7 +47,7 @@ public class TreasureDataLogger extends FluentLogger {
                     "Cannot specify null or null charactor as value of database");
         }
 
-        String key, host, apiKey = null;
+        String key, host, apiKey, agentTag = null;
         int port, timeout = 0, bufferCapacity = 0;
 
         boolean agentMode = Boolean.parseBoolean(props.getProperty(
@@ -82,13 +82,16 @@ public class TreasureDataLogger extends FluentLogger {
             port = Integer.parseInt(props.getProperty(
                     Config.TD_LOGGER_AGENT_PORT,
                     Config.TD_LOGGER_AGENT_PORT_DEFAULT));
+            agentTag = props.getProperty(
+                    Config.TD_LOGGER_AGENT_TAG,
+                    Config.TD_LOGGER_AGENT_TAG_DEFAULT);
             timeout = Integer.parseInt(props.getProperty(
                     Config.TD_LOGGER_AGENT_TIMEOUT,
                     Config.TD_LOGGER_AGENT_TIMEOUT_DEFAULT));
             bufferCapacity = Integer.parseInt(props.getProperty(
                     Config.TD_LOGGER_AGENT_BUFCAPACITY,
                     Config.TD_LOGGER_AGENT_BUFCAPACITY_DEFAULT));
-            key = String.format("%s_%s_%d_%d_%d", database, host, port, timeout, bufferCapacity);
+            key = String.format("%s_%s_%d_%s_%d_%d", database, host, port, agentTag, timeout, bufferCapacity);
         }
 
         if (loggers.containsKey(key)) {
@@ -103,7 +106,13 @@ public class TreasureDataLogger extends FluentLogger {
             logger = new TreasureDataLogger(database, new HttpSender(host, port, apiKey));
         } else {
             // agent mode is connected to specified fluentd
-            logger = new TreasureDataLogger(database,
+            String tagPrefix;
+            if(agentTag.isEmpty()) {
+                tagPrefix = database;
+            } else {
+                tagPrefix = agentTag + "." + database;
+            }
+            logger = new TreasureDataLogger(tagPrefix,
                     new RawSocketSender(host, port, timeout, bufferCapacity));
         }
         loggers.put(key, logger);

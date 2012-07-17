@@ -29,6 +29,7 @@ public class TestTDLoggerAgentNormalOperation {
         props.setProperty(Config.TD_LOGGER_AGENT_HOST, "localhost");
         props.setProperty(Config.TD_LOGGER_AGENT_PORT, "25225");
         props.setProperty(Config.TD_LOGGER_AGENTMODE, "true");
+        props.setProperty(Config.TD_LOGGER_AGENT_TAG, "tdtd");
     }
 
     @Test @Ignore
@@ -74,13 +75,13 @@ public class TestTDLoggerAgentNormalOperation {
         assertEquals(2, no01.size());
         {
             Event e = no01.get(0);
-            assertEquals("tag1.label1", e.tag);
+            assertEquals("tdtd.tag1.label1", e.tag);
             assertEquals("t1v1", e.data.get("t1k1"));
             assertEquals("t1v2", e.data.get("t1k2"));
         }
         {
             Event e = no01.get(1);
-            assertEquals("tag1.label2", e.tag);
+            assertEquals("tdtd.tag1.label2", e.tag);
             assertEquals("t1v1", e.data.get("t1k1"));
             assertEquals("t1v2", e.data.get("t1k2"));
         }

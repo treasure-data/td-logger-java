@@ -34,6 +34,10 @@ public interface Constants extends com.treasure_data.client.Constants {
 
     String TD_LOGGER_AGENT_PORT_DEFAULT = "24224";
 
+    String TD_LOGGER_AGENT_TAG = "td.logger.agent.tag";
+
+    String TD_LOGGER_AGENT_TAG_DEFAULT = "td";
+
     String TD_LOGGER_AGENT_TIMEOUT = "td.logger.agent.timeout";
 
     String TD_LOGGER_AGENT_TIMEOUT_DEFAULT = "3000";
