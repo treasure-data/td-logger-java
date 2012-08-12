@@ -76,7 +76,7 @@ class HttpSenderThread implements Runnable {
             long nextWait;
             if (errorCount == 0) {
                 if (flushed && flushInterval < maxFlushInterval) {
-                    flushInterval = Math.min(flushInterval, maxFlushInterval);
+                    flushInterval = Math.min(flushInterval + 60, maxFlushInterval);
                 }
                 nextWait = flushInterval;
             } else {
