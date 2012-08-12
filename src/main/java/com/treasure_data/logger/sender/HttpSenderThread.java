@@ -37,11 +37,11 @@ class HttpSenderThread implements Runnable {
 
     private TreasureDataClient client;
 
-    private AtomicBoolean flushNow = new AtomicBoolean(false);
+    private AtomicBoolean flushNow = new AtomicBoolean(true);
 
-    private long flushInterval = 10 * 1000;
+    private long flushInterval = 10; // sec
 
-    private long maxFlushInterval = 300 * 1000;
+    private long maxFlushInterval = 300; // sec
 
     private double retryWait = 1.0;
 
@@ -49,7 +49,7 @@ class HttpSenderThread implements Runnable {
 
     private AtomicBoolean finished = new AtomicBoolean(false);
 
-    private long nextTime = System.currentTimeMillis() + flushInterval;
+    private long nextTime = (System.currentTimeMillis() / 1000) + flushInterval;
 
     private int errorCount = 0;
 
@@ -65,7 +65,7 @@ class HttpSenderThread implements Runnable {
 
     void upload() {
         while (!finished.get()) {
-            long now = System.currentTimeMillis();
+            long now = System.currentTimeMillis() / 1000;
 
             boolean flushed = false;
             if (nextTime <= now || (flushNow.get() && errorCount == 0)) {
@@ -76,7 +76,7 @@ class HttpSenderThread implements Runnable {
             long nextWait;
             if (errorCount == 0) {
                 if (flushed && flushInterval < maxFlushInterval) {
-                    flushInterval = Math.min(flushInterval + 60 * 1000, maxFlushInterval);
+                    flushInterval = Math.min(flushInterval, maxFlushInterval);
                 }
                 nextWait = flushInterval;
             } else {
@@ -86,7 +86,7 @@ class HttpSenderThread implements Runnable {
             nextTime = nextWait + now;
 
             try {
-                Thread.sleep(nextWait);
+                Thread.sleep(nextWait * 1000);
             } catch (InterruptedException e) {
             }
         }
