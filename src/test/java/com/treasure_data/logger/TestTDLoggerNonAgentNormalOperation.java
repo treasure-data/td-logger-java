@@ -22,12 +22,12 @@ public class TestTDLoggerNonAgentNormalOperation {
         props.setProperty(Config.TD_LOGGER_AGENTMODE, "false");
         TreasureDataLogger logger = TreasureDataLogger.getLogger("mugadb");
 
-        for (int i = 0; i < 1000; ++i) {
+        for (int i = 0; i < 10; ++i) {
             Map<String, Object> data = new HashMap<String, Object>();
             for (int j = 0; j < 16; ++j) {
                 data.put("kk:" + ":" + j, "vv:" + ":" + j);
             }
-            logger.log("newscore01", data);
+            logger.log("mugatbl", data);
         }
 
         //logger.flush();
