@@ -20,8 +20,13 @@
   <scm>
     <connection>scm:git:git://github.com/treasure-data/td-logger-java.git</connection>
     <developerConnection>scm:git:git@github.com:treasure-data/td-logger-java.git</developerConnection>
-    <url>https://github.com/treasure-data/td-logger-java</url>
+    <url>scm:git:git://github.com/treasure-data/td-logger-java.git</url>
   </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/treasure-data/td-logger-java/issues</url>
+  </issueManagement>
 
   <developers>
     <developer>
@@ -72,11 +77,6 @@
       <groupId>org.fluentd</groupId>
       <artifactId>fluent-logger</artifactId>
       <version>0.2.5</version>
-    </dependency>
-    <dependency>
-      <groupId>org.msgpack</groupId>
-      <artifactId>msgpack</artifactId>
-      <version>0.6.6</version>
     </dependency>
     <dependency>
       <groupId>com.treasure_data</groupId>
