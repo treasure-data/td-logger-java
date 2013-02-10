@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>td-logger-project</artifactId>
+    <groupId>com.treasure_data</groupId>
+    <version>0.1.5-SNAPSHOT</version>
+    <relativePath>../</relativePath>
+  </parent>
+
+  <groupId>com.treasure_data</groupId>
+  <artifactId>td-logger4gae</artifactId>
+  <name>Treasure Data Logger for Java Application on Google App Engine</name>
+  <description>Java implementation of Treasure Data Logger for Java Application on Google App Engine.</description>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <url>https://github.com/treasure-data/td-logger-java</url>
+
+  <scm>
+    <connection>scm:git:git://github.com/treasure-data/td-logger-java.git</connection>
+    <developerConnection>scm:git:git@github.com:treasure-data/td-logger-java.git</developerConnection>
+    <url>scm:git:git://github.com/treasure-data/td-logger-java.git</url>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.treasure_data</groupId>
+      <artifactId>td-logger</artifactId>
+      <version>0.1.5-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>
