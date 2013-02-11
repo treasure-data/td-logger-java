@@ -92,6 +92,7 @@ public class HttpSender implements Sender {
 
     private int chunkLimit = 8 * 1024 * 1024; // 8MB
 
+    protected Properties props;
     protected String host;
     protected int port;
     protected String apiKey;
@@ -102,7 +103,8 @@ public class HttpSender implements Sender {
 
     private String name;
 
-    public HttpSender(final String host, final int port, final String apiKey) {
+    public HttpSender(Properties props, final String host, final int port, final String apiKey) {
+        this.props = props;
         if (apiKey == null) {
             throw new IllegalArgumentException("APIKey is required");
         }

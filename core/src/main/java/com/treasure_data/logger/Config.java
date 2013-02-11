@@ -34,10 +34,11 @@ public class Config extends com.treasure_data.client.Config implements Constants
         LOG.info("use sender class: " + senderClassName);
         try {
             @SuppressWarnings("unchecked")
-            Class<HttpSender> senderClass = (Class<HttpSender>) Class.forName(senderClassName);
-            Constructor<HttpSender> cons = senderClass.getConstructor(String.class,
-                    int.class, String.class);
-            return cons.newInstance(host, port, apiKey);
+            Class<HttpSender> senderClass = (Class<HttpSender>) Class
+                    .forName(senderClassName);
+            Constructor<HttpSender> cons = senderClass.getConstructor(
+                    Properties.class, String.class, int.class, String.class);
+            return cons.newInstance(props, host, port, apiKey);
         } catch (Exception e) {
             LOG.throwing(Config.class.getName(), "createSender", e);
         }

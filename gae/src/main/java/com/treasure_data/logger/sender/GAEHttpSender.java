@@ -18,6 +18,7 @@
 package com.treasure_data.logger.sender;
 
 import java.io.IOException;
+import java.util.Properties;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
@@ -29,8 +30,8 @@ import com.treasure_data.logger.sender.HttpSender;
 public class GAEHttpSender extends HttpSender {
     private Queue gaequeue;
 
-    public GAEHttpSender(String host, int port, String apiKey) {
-        super(host, port, apiKey);
+    public GAEHttpSender(Properties props, String host, int port, String apiKey) {
+        super(props, host, port, apiKey);
     }
 
     @Override
@@ -55,7 +56,6 @@ public class GAEHttpSender extends HttpSender {
                 .header("Content-Length", "" + bytes.length)
                 .param("database", databaseName)
                 .param("table", tableName)
-                //.payload(bytes)
                 .method(Method.PUT);
         gaequeue.add(opts);
     }
