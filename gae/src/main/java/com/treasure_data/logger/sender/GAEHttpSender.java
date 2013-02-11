@@ -31,10 +31,17 @@ import com.treasure_data.logger.sender.HttpSender;
 
 public class GAEHttpSender extends HttpSender {
     private static Logger LOG = Logger.getLogger(GAEHttpSender.class.getName());
+
     private Queue gaequeue;
+    private String application;
 
     public GAEHttpSender(Properties props, String host, int port, String apiKey) {
         super(props, host, port, apiKey);
+        application = props.getProperty(GAEConfig.TD_LOGGER_GAEHTTPSENDER_APPLICATION);
+        if (application == null) {
+            throw new IllegalArgumentException(
+                    "your application name must be not specified. please specify with td.logger.gaehttpsender.application");
+        }
     }
 
     @Override
@@ -59,11 +66,12 @@ public class GAEHttpSender extends HttpSender {
         // TODO #MN need refactoring
         //String urlpart = "api.treasure-data.com:80/v3/table/import/%s/%s/msgpack.gz";
         //String url = String.format(urlpart, databaseName, tableName);
-        TaskOptions opts = Builder.withPayload(bytes, "application/octet-stream")
-                .url("/mygae")
-                .header("Content-Length", "" + bytes.length)
-                .param("database", databaseName)
-                .param("table", tableName)
+        TaskOptions opts = Builder
+                .withPayload(bytes, GAEConfig.TD_LOGGER_GAEHTTPSENDER_CONTENT_TYPE)
+                .url(application)
+                .header(GAEConfig.TD_LOGGER_GAEHTTPSENDER_CONTENT_LENGTH, "" + bytes.length)
+                .param(GAEConfig.TD_LOGGER_GAEHTTPSENDER_DATABASE, databaseName)
+                .param(GAEConfig.TD_LOGGER_GAEHTTPSENDER_TABLE, tableName)
                 .method(Method.PUT);
         try {
             gaequeue.add(opts);

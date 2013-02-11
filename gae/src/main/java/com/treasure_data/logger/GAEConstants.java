@@ -20,4 +20,11 @@ package com.treasure_data.logger;
 public interface GAEConstants {
 
     String TD_LOGGER_GAEHTTPSENDER_QUEUE = "td.logger.gaehttpsender.queue";
+
+    String TD_LOGGER_GAEHTTPSENDER_APPLICATION = "td.logger.gaehttpsender.application";
+
+    String TD_LOGGER_GAEHTTPSENDER_CONTENT_LENGTH = "Content-Length";
+    String TD_LOGGER_GAEHTTPSENDER_CONTENT_TYPE = "application/octet-stream";
+    String TD_LOGGER_GAEHTTPSENDER_DATABASE = "database";
+    String TD_LOGGER_GAEHTTPSENDER_TABLE = "table";
 }
