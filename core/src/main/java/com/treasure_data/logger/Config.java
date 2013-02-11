@@ -42,7 +42,7 @@ public class Config extends com.treasure_data.client.Config implements Constants
         } catch (Exception e) {
             LOG.throwing(Config.class.getName(), "createSender", e);
         }
-        return new HttpSender(host, port, apiKey);
+        return new HttpSender(props, host, port, apiKey);
     }
 
 }
