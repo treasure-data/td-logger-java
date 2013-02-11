@@ -19,15 +19,18 @@ package com.treasure_data.logger.sender;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.api.taskqueue.TaskOptions.Builder;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
+import com.treasure_data.logger.GAEConfig;
 import com.treasure_data.logger.sender.HttpSender;
 
 public class GAEHttpSender extends HttpSender {
+    private static Logger LOG = Logger.getLogger(GAEHttpSender.class.getName());
     private Queue gaequeue;
 
     public GAEHttpSender(Properties props, String host, int port, String apiKey) {
@@ -36,8 +39,13 @@ public class GAEHttpSender extends HttpSender {
 
     @Override
     public void startBackgroundProcess() {
-        // TODO #MN queue name should be specified by users
-        gaequeue = QueueFactory.getDefaultQueue();
+        String queueName = props.getProperty(GAEConfig.TD_LOGGER_GAEHTTPSENDER_QUEUE);
+        if (queueName != null) {
+            gaequeue = QueueFactory.getQueue(queueName);
+        } else {
+            // if users don't specify queue name, return default queue.
+            gaequeue = QueueFactory.getDefaultQueue();
+        }
     }
 
     @Override
@@ -57,7 +65,14 @@ public class GAEHttpSender extends HttpSender {
                 .param("database", databaseName)
                 .param("table", tableName)
                 .method(Method.PUT);
-        gaequeue.add(opts);
+        try {
+            gaequeue.add(opts);
+        } catch (IllegalStateException e) {
+            LOG.severe(String.format(
+                    "cannot send records to %s.%s on Treasure Data: %s",
+                    databaseName, tableName, e.getMessage()));
+            LOG.throwing(getClass().getName(), "putQueue", e);
+        }
     }
 
     @Override

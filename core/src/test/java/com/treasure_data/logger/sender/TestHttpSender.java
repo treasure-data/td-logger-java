@@ -26,7 +26,7 @@ public class TestHttpSender {
         int port = Integer.parseInt(props.getProperty(
                 Config.TD_LOGGER_API_SERVER_PORT, Config.TD_LOGGER_API_SERVER_PORT_DEFAULT));
         String apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
-        HttpSender sender = new HttpSender(host, port, apiKey);
+        HttpSender sender = new HttpSender(props, host, port, apiKey);
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("k1", "v1");
         sender.emit("mugadb.loggertable", data);

@@ -19,4 +19,5 @@ package com.treasure_data.logger;
 
 public interface GAEConstants {
 
+    String TD_LOGGER_GAEHTTPSENDER_QUEUE = "td.logger.gaehttpsender.queue";
 }
