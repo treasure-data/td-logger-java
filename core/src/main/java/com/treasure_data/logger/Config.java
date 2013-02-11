@@ -17,6 +17,31 @@
 //
 package com.treasure_data.logger;
 
+import java.lang.reflect.Constructor;
+import java.util.Properties;
+import java.util.logging.Logger;
+
+import com.treasure_data.logger.sender.HttpSender;
+
 public class Config extends com.treasure_data.client.Config implements Constants {
+    private static Logger LOG = Logger.getLogger(Config.class.getName());
+
+    public static HttpSender createHttpSender(Properties props, String host, int port,
+            String apiKey) {
+        String senderClassName = props.getProperty(TD_LOGGER_HTTPSENDER_CLASS,
+                TD_LOGGER_HTTPSENDER_CLASS_DEFAULT);
+
+        LOG.info("use sender class: " + senderClassName);
+        try {
+            @SuppressWarnings("unchecked")
+            Class<HttpSender> senderClass = (Class<HttpSender>) Class.forName(senderClassName);
+            Constructor<HttpSender> cons = senderClass.getConstructor(String.class,
+                    int.class, String.class);
+            return cons.newInstance(host, port, apiKey);
+        } catch (Exception e) {
+            LOG.throwing(Config.class.getName(), "createSender", e);
+        }
+        return new HttpSender(host, port, apiKey);
+    }
 
 }
