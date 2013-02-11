@@ -103,7 +103,10 @@ public class TreasureDataLogger extends FluentLogger {
         TreasureDataLogger logger;
         if (!agentMode) {
             // connected to TD platform directly
-            logger = new TreasureDataLogger(database, new HttpSender(host, port, apiKey));
+            HttpSender sender = Config.createHttpSender(props, host, port, apiKey);
+            LOG.info("created sender class: " + sender.getClass().getName());
+            sender.startBackgroundProcess();
+            logger = new TreasureDataLogger(database, sender);
         } else {
             // agent mode is connected to specified fluentd
             String tagPrefix;

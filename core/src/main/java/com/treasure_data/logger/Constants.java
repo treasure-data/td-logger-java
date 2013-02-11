@@ -18,9 +18,9 @@
 package com.treasure_data.logger;
 
 public interface Constants extends com.treasure_data.client.Constants {
-    //////
-    // For agent mode
-    ////
+    ///////////////////////////
+    // For agent mode        //
+    ///////////////////////////
 
     String TD_LOGGER_AGENTMODE = "td.logger.agentmode";
 
@@ -46,9 +46,9 @@ public interface Constants extends com.treasure_data.client.Constants {
 
     String TD_LOGGER_AGENT_BUFCAPACITY_DEFAULT = "1048576"; // 1 * 1024 * 1024
 
-    //////
-    // For API server mode
-    ////
+    ///////////////////////////
+    // For API server mode   //
+    ///////////////////////////
 
     String TD_LOGGER_API_KEY = "td.logger.api.key";
 
@@ -63,4 +63,8 @@ public interface Constants extends com.treasure_data.client.Constants {
     String TD_LOGGER_AUTO_CREATE_TABLE = "td.logger.create.table.auto";
 
     String TD_LOGGER_AUTO_CREATE_TABLE_DEFAULT = "false";
+
+    String TD_LOGGER_HTTPSENDER_CLASS = "td.logger.httpsender.class";
+    String TD_LOGGER_HTTPSENDER_CLASS_DEFAULT = "com.treasure_data.logger.sender.HttpSender";
+
 }

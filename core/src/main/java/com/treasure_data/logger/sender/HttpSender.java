@@ -92,10 +92,12 @@ public class HttpSender implements Sender {
 
     private int chunkLimit = 8 * 1024 * 1024; // 8MB
 
+    protected String host;
+    protected int port;
+    protected String apiKey;
+
     LinkedBlockingQueue<QueueEvent> queue;
-
     private int queueLimit = 50;
-
     private HttpSenderThread senderThread;
 
     private String name;
@@ -104,14 +106,20 @@ public class HttpSender implements Sender {
         if (apiKey == null) {
             throw new IllegalArgumentException("APIKey is required");
         }
-        Properties props = System.getProperties();
+
         msgpack = new MessagePack();
         chunks = new ConcurrentHashMap<String, ExtendedPacker>();
+        this.host = host;
+        this.port = port;
+        this.apiKey = apiKey;
+        name = String.format("%s_%d", host, port);
+    }
+
+    public void startBackgroundProcess() {
         queue = new LinkedBlockingQueue<QueueEvent>();
-        TreasureDataClient client = new TreasureDataClient(new TreasureDataCredentials(apiKey), props);
+        TreasureDataClient client = new TreasureDataClient(new TreasureDataCredentials(apiKey), System.getProperties());
         senderThread = new HttpSenderThread(this, client);
         new Thread(senderThread).start();
-        name = String.format("%s_%d", host, port);
     }
 
     private synchronized Map<String, ExtendedPacker> recreateChunks() {
@@ -152,7 +160,7 @@ public class HttpSender implements Sender {
         }
 
         // check queue limit
-        if (queue.size() > queueLimit) {
+        if (getQueueSize() > queueLimit) {
             LOG.severe("queue length exceeds limit. cannot add new event log");
             return false;
         }
@@ -179,13 +187,12 @@ public class HttpSender implements Sender {
 
         if (packer.getChunkSize() > chunkLimit) {
             try {
-                queue.put(new QueueEvent(databaseName, tableName, packer.getByteArray()));
+                putQueue(databaseName, tableName, packer.getByteArray());
 
                 if (LOG.isLoggable(Level.FINE)) {
                     LOG.fine(String.format("Put event on queue (size: %d)",
-                            new Object[] { queue.size() }));
+                            new Object[] { getQueueSize() }));
                 }
-            } catch (InterruptedException e) { // ignore
             } catch (IOException e) {
                 LOG.throwing(this.getClass().getName(), "emit0", e);
             } finally {
@@ -193,6 +200,17 @@ public class HttpSender implements Sender {
             }
         }
         return true;
+    }
+
+    protected int getQueueSize() {
+        return queue.size();
+    }
+
+    protected void putQueue(String databaseName, String tableName, byte[] bytes) {
+        try {
+            queue.put(new QueueEvent(databaseName, tableName, bytes));
+        } catch (InterruptedException e) { // ignore
+        }
     }
 
     private synchronized ExtendedPacker getPacker(String key) throws IOException {
@@ -239,10 +257,7 @@ public class HttpSender implements Sender {
                 String tableName = splited[1];
                 try {
                     byte[] bytes = entry.getValue().getByteArray();
-                    try {
-                        queue.put(new QueueEvent(databaseName, tableName, bytes));
-                    } catch (InterruptedException e) { // ignore
-                    }
+                    putQueue(databaseName, tableName, bytes);
                 } catch (IOException e) {
                     LOG.throwing(this.getClass().getName(), "flushChunks", e);
                 }
