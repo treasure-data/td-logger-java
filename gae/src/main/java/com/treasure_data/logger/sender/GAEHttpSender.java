@@ -1,9 +1,23 @@
+//
+// Treasure Data Logger for Java.
+//
+// Copyright (C) 2011 - 2013 Muga Nishizawa
+//
+//    Licensed under the Apache License, Version 2.0 (the "License");
+//    you may not use this file except in compliance with the License.
+//    You may obtain a copy of the License at
+//
+//        http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS,
+//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//    See the License for the specific language governing permissions and
+//    limitations under the License.
+//
 package com.treasure_data.logger.sender;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
@@ -13,9 +27,6 @@ import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.treasure_data.logger.sender.HttpSender;
 
 public class GAEHttpSender extends HttpSender {
-    private static final SimpleDateFormat RFC2822FORMAT =
-            new SimpleDateFormat( "E, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH );
-
     private Queue gaequeue;
 
     public GAEHttpSender(String host, int port, String apiKey) {
@@ -47,10 +58,6 @@ public class GAEHttpSender extends HttpSender {
                 //.payload(bytes)
                 .method(Method.PUT);
         gaequeue.add(opts);
-    }
-
-    private static String toRFC2822Format(Date from) {
-        return RFC2822FORMAT.format(from);
     }
 
     @Override
