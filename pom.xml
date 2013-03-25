@@ -80,7 +80,7 @@
   <properties>
     <!-- version properties for dependencies -->
     <fluent-logger.version>0.2.8</fluent-logger.version>
-    <td-client.version>0.2.3</td-client.version>
+    <td-client.version>0.2.4</td-client.version>
     <junit.version>4.8.2</junit.version>
     <mockito.version>1.9.5</mockito.version>
 
