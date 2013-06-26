@@ -118,6 +118,7 @@ public class TreasureDataLogger extends FluentLogger {
             logger = new TreasureDataLogger(tagPrefix,
                     new RawSocketSender(host, port, timeout, bufferCapacity));
         }
+
         loggers.put(key, logger);
         return logger;
     }
