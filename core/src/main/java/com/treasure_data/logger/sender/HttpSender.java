@@ -131,7 +131,11 @@ public class HttpSender implements Sender {
     }
 
     public boolean emit(String tag, Map<String, Object> record) {
-        return emit(tag, System.currentTimeMillis() / 1000, record);
+        if (record.containsKey("time")) {
+            return emit0(tag, record);
+        } else {
+            return emit(tag, System.currentTimeMillis() / 1000, record);
+        }
     }
 
     public boolean emit(String tag, long timestamp, Map<String, Object> record) {
