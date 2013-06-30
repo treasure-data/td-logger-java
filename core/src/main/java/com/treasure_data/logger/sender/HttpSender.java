@@ -119,7 +119,14 @@ public class HttpSender implements Sender {
 
     public void startBackgroundProcess() {
         queue = new LinkedBlockingQueue<QueueEvent>();
-        TreasureDataClient client = new TreasureDataClient(new TreasureDataCredentials(apiKey), System.getProperties());
+        Properties properties = System.getProperties();
+        if (host != null) {
+            properties.put("td.api.server.host", host);
+        }
+        if (port > 0) {
+            properties.put("td.api.server.port", String.valueOf(port));
+        }
+        TreasureDataClient client = new TreasureDataClient(new TreasureDataCredentials(apiKey), properties);
         senderThread = new HttpSenderThread(this, client);
         new Thread(senderThread).start();
     }

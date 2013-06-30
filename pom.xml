@@ -58,13 +58,6 @@
 
   <repositories>
     <repository>
-      <id>fluentd.org</id>
-      <url>http://fluentd.org/maven2/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
       <id>maven.treasure-data.com</id>
       <url>http://maven.treasure-data.com/</url>
       <snapshots>
