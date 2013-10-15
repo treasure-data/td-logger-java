@@ -13,7 +13,7 @@
   </parent>
 
   <groupId>com.treasure_data</groupId>
-  <artifactId>td-logger-project</artifactId>
+  <artifactId>td-logger-parent</artifactId>
   <version>0.1.5-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Treasure Data Logger Project for Java Application</name>

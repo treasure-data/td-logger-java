@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>td-logger-project</artifactId>
+    <artifactId>td-logger-parent</artifactId>
     <groupId>com.treasure_data</groupId>
     <version>0.1.5-SNAPSHOT</version>
     <relativePath>../</relativePath>
