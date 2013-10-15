@@ -6,12 +6,6 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache</groupId>
-    <artifactId>apache</artifactId>
-    <version>11</version>
-  </parent>
-
   <groupId>com.treasure_data</groupId>
   <artifactId>td-logger-parent</artifactId>
   <version>0.1.5-SNAPSHOT</version>
