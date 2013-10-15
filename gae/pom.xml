@@ -9,7 +9,7 @@
   <parent>
     <artifactId>td-logger-parent</artifactId>
     <groupId>com.treasure_data</groupId>
-    <version>0.1.5-SNAPSHOT</version>
+    <version>0.1.6-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
 
@@ -21,17 +21,11 @@
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-logger-java</url>
 
-  <scm>
-    <connection>scm:git:git://github.com/treasure-data/td-logger-java.git</connection>
-    <developerConnection>scm:git:git@github.com:treasure-data/td-logger-java.git</developerConnection>
-    <url>scm:git:git://github.com/treasure-data/td-logger-java.git</url>
-  </scm>
-
   <dependencies>
     <dependency>
       <groupId>com.treasure_data</groupId>
       <artifactId>td-logger</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.1.6-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
