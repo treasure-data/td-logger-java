@@ -5,7 +5,7 @@
 
   <groupId>com.treasure_data</groupId>
   <artifactId>td-logger-parent</artifactId>
-  <version>0.1.5</version>
+  <version>0.1.6-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Treasure Data Logger Project for Java Application</name>
   <description>Java implementation of Treasure Data Logger.</description>
