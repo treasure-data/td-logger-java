@@ -28,10 +28,30 @@
     </license>
   </licenses>
 
-  <modules>
-    <module>core</module>
-    <module>gae</module>
-  </modules>
+  <profiles>
+    <profile>
+      <id>all</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>core</module>
+        <module>gae</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>core</id>
+      <modules>
+        <module>core</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>gae</id>
+      <modules>
+        <module>gae</module>
+      </modules>
+    </profile>
+  </profiles>
 
   <developers>
     <developer>
