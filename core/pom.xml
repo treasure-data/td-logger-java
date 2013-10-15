@@ -21,10 +21,4 @@
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-logger-java</url>
 
-  <scm>
-    <connection>scm:git:git://github.com/treasure-data/td-logger-java.git</connection>
-    <developerConnection>scm:git:git@github.com:treasure-data/td-logger-java.git</developerConnection>
-    <url>scm:git:git://github.com/treasure-data/td-logger-java.git</url>
-  </scm>
-
 </project>
