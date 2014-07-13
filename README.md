@@ -119,6 +119,8 @@ On the other hand if you want to upload data via td-agent, you should declare th
     td.logger.agentmode=true
     td.logger.agent.host=<your td-agent host>
     td.logger.agent.port=<your td-agent port>
+    
+See below for the description of each of these properties.
 
 ### Agent's Host and Port
 
@@ -146,13 +148,20 @@ The agent's maximum buffering capacity can be set using the `td.logger.agent.buf
 
 The default value is `1048576` bytes (1 MB).
 
-### Direct Upload's API Key
+### REST APIs Key
 
 In order for the logger to be able to authenticate with your account in the Treasure Data Cloud, the REST APIs require an API key. The key can be provided by the `td.logger.api.key` property. 
 
 This property does not have a default value.
 
 Alternatively the API key can be provided via the `TREASURE_DATA_API_KEY` environment variable. The environment variable takes precedene over the `td.logger.api.key` property.
+
+Please note that we recommend to use a write-only API key for the SDK. To obtain one, please:
+
+1. Login into the Treasure Data Console at http://console.treasuredata.com;
+2. Visit your Profile page at http://console.treasuredata.com/users/current;
+3. Insert your password under the 'API Keys' panel;
+4. In the bottom part of the panel, under 'Write-Only API keys', either copy the API key or click on 'Generate New' and copy the new API key.
 
 ### REST APIs Server Host and Port
 
