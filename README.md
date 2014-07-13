@@ -10,10 +10,12 @@ reliably is a challenging task.
 Treasure Data Logger solves the problem by having: easy installation, small 
 footprint, plugins reliable buffering, log forwarding, etc.
 
-  * Treasure Data website: [http://treasure-data.com/](http://treasure-data.com/)
+  * Treasure Data website: [http://treasuredata.com/](http://treasure-data.com/)
   * Treasure Data GitHub: [https://github.com/treasure-data/](https://github.com/treasure-data/)
 
-**td-logger-java** is a Java library, to record events from Java application.
+**td-logger-java** is a Java library, to record events from Java application. It supports two modes of operation: direct and indirect upload (through a td-agent, learn more [here](http://help.treasuredata.com/customer/portal/topics/550539-installing-td-agent/articles)).
+
+This library leverages the [Treasure Data Java Client library, **td-client-java**](https://github.com/treasure-data/td-client-java) in direct upload mode and the [Fluentd Java Logger library, **fluent-logger-java**](https://github.com/fluent/fluent-logger-java) in indirect upload mode.
 
 ## Requirements
 
@@ -87,6 +89,83 @@ For more detail, see pom.xml.
 **Replace ${logger.version} with the current version of Treasure Data Logger for Java.**
 **The current version is 0.1.3.**
 
+## Configuration
+
+This logging library provides a variety of configuration options as Java System properties.
+These options can be specified on the comamnd-line or using a properties file and loading it in the system properties at runtime.
+
+    Properties props = System.getProperties();
+    props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+
+The current list of supported properties and their significance follows.
+
+### Direct vs Indirect Upload
+
+To select indirect upload through td-agent, please set the `td.logger.agentmode` property to 'true'.
+For direct upload please set the property to 'false'.
+
+The default value is `true`.
+
+Also note that if the `TREASURE_DATA_API_KEY` environment variable is set, `td.logger.agentmode = false` will be set by default.
+
+Generally speaking if you want to directly upload event logs from your application, you should set your own values to the
+following properties:
+
+    td.logger.agentmode=false
+    td.logger.api.key=<your API key>
+
+On the other hand if you want to upload data via td-agent, you should declare the following properties:
+
+    td.logger.agentmode=true
+    td.logger.agent.host=<your td-agent host>
+    td.logger.agent.port=<your td-agent port>
+
+### Agent's Host and Port
+
+These two propertie set the location and port the Treasure Agent can be reached by: `td.logger.agent.host` and `td.logger.agent.port`.
+
+Their default value is `localhost` and `24224` respectively.
+
+### Agent's Tag Prefix
+
+Treasure Agent marks the logging events using a 'tag', which is formed by a series of alphanumeric strings separated by a period character: e.g. 'string1.string2.string3'. Events created this logger are tagged with the database and table name the events are expected to be imported to. On the receiving end, the Treasure Agent, the database and table name will be used to determine the final database and table destination in the Treasure Data Cloud.
+
+The `td.logger.agent.tag` properties provides the ability to set a fixed prefix for the tag that will be automatically added to all events logged by the library. For example, if events are destined to the 'mydb' database, and 'mytable' table within it, setting the `td.logger.agent.tag` property to `mycomp` will cause the tag to become `mycomp.mydb.mytable` as opposed to the default `td.mydb.mytable`. This is very important as the tag matching on the Treasure Agent side will need to be `mycomp.*.*` as opposed to the standard `td.*.*`.
+
+The default value is `td`.
+
+### Agent's Connection Timeout
+
+The connection timeout can be set with the `td.logger.agent.timeout` property. The value is in seconds.
+
+The default value is `3000` seconds.
+
+### Agent's Buffer Capacity
+
+The agent's maximum buffering capacity can be set using the `td.logger.agent.buffercapacity` property. The value is in bytes.
+
+The default value is `1048576` bytes (1 MB).
+
+### Direct Upload's API Key
+
+In order for the logger to be able to authenticate with your account in the Treasure Data Cloud, the REST APIs require an API key. The key can be provided by the `td.logger.api.key` property. 
+
+This property does not have a default value.
+
+Alternatively the API key can be provided via the `TREASURE_DATA_API_KEY` environment variable. The environment variable takes precedene over the `td.logger.api.key` property.
+
+### REST APIs Server Host and Port
+
+The Treasure Data REST APIs Server host and port can be specified using the `td.logger.api.server.host` and `td.logger.api.server.port` properties.
+
+Their default values are `api.treasuredata.com` and `80` respectively.
+
+### Auto Create
+
+Both in case of Direct or Indirect Upload the system is able to create the destination table and/or database should they not already exist. This capability is disabled by default but can be enabled by setting the `td.logger.create.table.auto` to `true`.
+
+Please note that depending on the permissions associated with the API key in use (either the one provided for direct upload or the one configured for the td-agent) databases may not be allowed to be created. Please see this [Access control documentation](http://docs.treasuredata.com/articles/access-control) page for more information.
+
 ## Quickstart
 
 ### Small example with Treasure Data Logger
@@ -134,29 +213,6 @@ See doApp method in Main class.  log method enables you to upload event logs.
 Event logs should be declared as variables of Map\<String, Object\> type.
 The key is String type.  The type of value is one of the followings: int,
 long, string, float, double.
-
-### Direct upload and In-direct upload
-
-You can choose how to upload event logs from the following methods.
-Installing td-agent is [here](http://help.treasure-data.com/kb/installing-td-agent-daemon).
-
-  * Direct upload from your applications
-  * In-direct upload from td-agent
-
-To switch between them, you can specify Java options and system properties on
-the command line, or by using an options file.  If you want to directly upload
-event logs from your application, you should set your own values to the
-following properties in treasure-data.properties file.
-
-    td.logger.agentmode=false
-    td.logger.api.key=<your API key>
-
-On the other hand if you want to upload data via td-agent, you should declare
-the following properties in the file.
-
-    td.logger.agentmode=true
-    td.logger.agent.host=<your td-agent host>
-    td.logger.agent.port=<your td-agent port>
 
 ## License
 
