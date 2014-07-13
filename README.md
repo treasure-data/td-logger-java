@@ -156,7 +156,7 @@ This property does not have a default value.
 
 Alternatively the API key can be provided via the `TREASURE_DATA_API_KEY` environment variable. The environment variable takes precedene over the `td.logger.api.key` property.
 
-Please note that we recommend to use a write-only API key for the SDK. To obtain one, please:
+Please note that we recommend to use a write-only API key. To obtain one, please:
 
 1. Login into the Treasure Data Console at http://console.treasuredata.com;
 2. Visit your Profile page at http://console.treasuredata.com/users/current;
@@ -168,6 +168,8 @@ Please note that we recommend to use a write-only API key for the SDK. To obtain
 The Treasure Data REST APIs Server host and port can be specified using the `td.logger.api.server.host` and `td.logger.api.server.port` properties.
 
 Their default values are `api.treasuredata.com` and `80` respectively.
+
+Alternatively the REST APIs Server can be specified with the `TD_API_SERVER` environment variable. The value of the environment variable is read by the 'td-client-java' library directly and takes precedence over all other properties for both 'td-logger-java' and 'td-client-java' (`td.api.server.host`, `td.api.server.port`, and `td.api.server.scheme`).
 
 ### Auto Create
 
