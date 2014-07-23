@@ -4,4 +4,4 @@ machine:
 
 test:
   override:
-    - mvn test
+    - mvn test -P core
