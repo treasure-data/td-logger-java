@@ -8,14 +8,14 @@
 
   <parent>
     <artifactId>td-logger-parent</artifactId>
-    <groupId>com.treasure_data</groupId>
+    <groupId>com.treasuredata</groupId>
     <version>0.1.6-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
 
-  <groupId>com.treasure_data</groupId>
+  <groupId>com.treasuredata</groupId>
   <artifactId>td-logger4gae</artifactId>
-  <name>Treasure Data Logger for Java Application on Google App Engine</name>
+  <name>Treasure Data Logger for Java on Google App Engine</name>
   <description>Java implementation of Treasure Data Logger for Java Application on Google App Engine.</description>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -23,7 +23,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.treasure_data</groupId>
+      <groupId>com.treasuredata</groupId>
       <artifactId>td-logger</artifactId>
       <version>0.1.6-SNAPSHOT</version>
       <scope>compile</scope>

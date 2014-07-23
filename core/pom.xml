@@ -5,12 +5,12 @@
 
   <parent>
     <artifactId>td-logger-parent</artifactId>
-    <groupId>com.treasure_data</groupId>
+    <groupId>com.treasuredata</groupId>
     <version>0.1.6-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
 
-  <groupId>com.treasure_data</groupId>
+  <groupId>com.treasuredata</groupId>
   <artifactId>td-logger</artifactId>
   <name>Treasure Data Logger for Java</name>
   <description>Java implementation of Treasure Data Logger.</description>
