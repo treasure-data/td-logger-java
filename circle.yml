@@ -1,6 +1,6 @@
 machine:
-  maven:
-    version: 3.0.5
+  java:
+    version: oraclejdk6
 
 test:
   override:
