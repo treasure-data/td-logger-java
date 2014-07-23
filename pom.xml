@@ -89,7 +89,7 @@
   <properties>
     <!-- version properties for dependencies -->
     <fluent-logger.version>0.2.8</fluent-logger.version>
-    <td-client.version>0.2.13</td-client.version>
+    <td-client.version>0.5.1</td-client.version>
     <junit.version>4.8.2</junit.version>
     <mockito.version>1.9.5</mockito.version>
 
@@ -112,7 +112,7 @@
       <version>${fluent-logger.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.treasure_data</groupId>
+      <groupId>com.treasuredata</groupId>
       <artifactId>td-client</artifactId>
       <version>${td-client.version}</version>
     </dependency>
