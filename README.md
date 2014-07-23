@@ -39,7 +39,7 @@ You can configure your pom.xml as follows to use it:
     <dependencies>
       ...
       <dependency>
-        <groupId>com.treasure_data</groupId>
+        <groupId>com.treasuredata</groupId>
         <artifactId>td-logger</artifactId>
         <version>${logger.version}</version>
       </dependency>
@@ -47,11 +47,6 @@ You can configure your pom.xml as follows to use it:
     </dependencies>
 
     <repositories>
-      <repository>
-        <id>treasure-data.com</id>
-        <name>Treasure Data's Maven Repository</name>
-        <url>http://maven.treasure-data.com/</url>
-      </repository>
       <repository>
         <id>fluentd.org</id>
         <name>Fluentd's Maven Repository</name>
@@ -66,7 +61,6 @@ To install td-logger From SBT (a build tool for Scala), please add the following
     /* in build.sbt */
     // Repositories
     resolvers ++= Seq(
-      "td-logger     Maven Repository" at "http://maven.treasure-data.com/",
       "fluent-logger Maven Repository" at "http://fluentd.org/maven2/"
     )
     // Dependencies
@@ -87,7 +81,7 @@ directory.  File name will be td-logger-${logger.version}-jar-with-dependencies.
 For more detail, see pom.xml.
 
 **Replace ${logger.version} with the current version of Treasure Data Logger for Java.**
-**The current version is 0.1.3.**
+**The current version is 0.2.0.**
 
 ## Configuration
 
