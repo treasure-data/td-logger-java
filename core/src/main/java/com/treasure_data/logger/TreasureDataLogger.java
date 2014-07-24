@@ -54,6 +54,12 @@ public class TreasureDataLogger extends FluentLogger {
                 Config.TD_LOGGER_AGENTMODE,
                 Config.TD_LOGGER_AGENTMODE_DEFAULT));
 
+        /*
+         * Define order for API key lookup.
+         * 1. lookup ENV['TD_API_KEY']
+         * 2. lookup props's 'td.logger.api.key'
+         * 3. lookup props's 'td.api.key'
+         */
         apiKey = System.getenv(Config.TD_ENV_API_KEY);
         if (apiKey != null && !apiKey.equals("")) {
             agentMode = false;
@@ -61,13 +67,23 @@ public class TreasureDataLogger extends FluentLogger {
 
         if (!agentMode) {
             if (apiKey == null) {
-                apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
+                if (props.containsKey(Config.TD_LOGGER_API_KEY)) {
+                    apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
+                }
             }
+
+            if (apiKey == null) {
+                if (props.containsKey(Config.TD_API_KEY)) {
+                    apiKey = props.getProperty(Config.TD_API_KEY);
+                }
+            }
+
             if (apiKey == null) {
                 throw new IllegalArgumentException(String.format(
                         "APIKey option is required as java property: %s",
                         Config.TD_LOGGER_API_KEY));
             }
+
             host = props.getProperty(
                     Config.TD_LOGGER_API_SERVER_HOST,
                     Config.TD_LOGGER_API_SERVER_HOST_DEFAULT);
