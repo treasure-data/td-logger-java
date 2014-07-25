@@ -40,6 +40,91 @@ public class TreasureDataLogger extends FluentLogger {
         return getLogger(database, props);
     }
 
+    /**
+     * Define order for API key lookup.
+     * 1. lookup ENV['TD_API_KEY']
+     * 2. lookup props's 'td.logger.api.key'
+     * 3. lookup props's 'td.api.key'
+     * 4. if not found, throw exception
+     */
+    private static String lookupApiKey(Properties props) {
+        String apiKey = System.getenv(Config.TD_ENV_API_KEY);
+        if (apiKey != null) {
+            return apiKey;
+        }
+
+        if (props.containsKey(Config.TD_LOGGER_API_KEY)) {
+            return props.getProperty(Config.TD_LOGGER_API_KEY);
+        }
+
+        if (props.containsKey(Config.TD_API_KEY)) {
+            return props.getProperty(Config.TD_API_KEY);
+        }
+
+        throw new IllegalArgumentException(
+                "If you use td-logger with non-agent mode, it requires your TreasureData's API key. " +
+                "You should it your to system property 'td.logger.api.key' or 'td.api.key'");
+    }
+
+    /**
+     * Define order for hostname lookup.
+     * 1. lookup props's td.logger.api.server.host
+     * 2. lookup props's td.api.server.host
+     * 3. return default value
+     */
+    private static String lookupHost(Properties props) {
+        if (props.containsKey(Config.TD_LOGGER_API_SERVER_HOST)) {
+            return props.getProperty(Config.TD_LOGGER_API_SERVER_HOST);
+        }
+
+        if (props.containsKey(Config.TD_API_SERVER_HOST)) {
+            return props.getProperty(Config.TD_API_SERVER_HOST);
+        }
+
+        return Config.TD_LOGGER_API_SERVER_HOST_DEFAULT;
+    }
+
+    /**
+     * Define order for port num lookup.
+     * 1. lookup props's td.logger.api.server.port
+     * 2. lookup props's td.api.server.port
+     * 3. return default value
+     */
+    private static String lookupPort(Properties props) {
+        if (props.containsKey(Config.TD_LOGGER_API_SERVER_PORT)) {
+            return props.getProperty(Config.TD_LOGGER_API_SERVER_PORT);
+        }
+
+        if (props.containsKey(Config.TD_API_SERVER_PORT)) {
+            return props.getProperty(Config.TD_API_SERVER_PORT);
+        }
+
+        return Config.TD_LOGGER_API_SERVER_PORT_DEFAULT;
+    }
+
+    /**
+     * Define order for scheme lookup.
+     * 1. lookup props's td.api.server.scheme
+     * 2. check props's td.api.server.port and suggest scheme
+     * 3. return default value
+     */
+    private static String lookupScheme(Properties props) {
+        if (props.containsKey(Config.TD_CK_API_SERVER_SCHEME)) {
+            return props.getProperty(Config.TD_CK_API_SERVER_SCHEME);
+        }
+
+        if (props.containsKey(Config.TD_API_SERVER_PORT)) {
+            String sport = props.getProperty(Config.TD_API_SERVER_PORT);
+            if (sport.equals("80")) {
+                return Config.TD_API_SERVER_SCHEME_HTTP;
+            } else if (sport.equals("443")) {
+                return Config.TD_API_SERVER_SCHEME_HTTPS;
+            }
+        }
+
+        return Config.TD_API_SERVER_SCHEME_DEFAULTVALUE;
+    }
+
     public static synchronized TreasureDataLogger getLogger(
             String database, Properties props) {
         if (database == null || database.equals("")) {
@@ -47,57 +132,32 @@ public class TreasureDataLogger extends FluentLogger {
                     "Cannot specify null or null charactor as value of database");
         }
 
-        String key, host, apiKey, agentTag = null;
+        String key, host, apiKey = null, agentTag = null;
         int port, timeout = 0, bufferCapacity = 0;
 
         boolean agentMode = Boolean.parseBoolean(props.getProperty(
                 Config.TD_LOGGER_AGENTMODE,
                 Config.TD_LOGGER_AGENTMODE_DEFAULT));
 
-        /*
-         * Define order for API key lookup.
-         * 1. lookup ENV['TD_API_KEY']
-         * 2. lookup props's 'td.logger.api.key'
-         * 3. lookup props's 'td.api.key'
-         */
-        apiKey = System.getenv(Config.TD_ENV_API_KEY);
-        if (apiKey != null && !apiKey.equals("")) {
-            agentMode = false;
-        }
-
         if (!agentMode) {
-            if (apiKey == null) {
-                if (props.containsKey(Config.TD_LOGGER_API_KEY)) {
-                    apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
-                }
-            }
+            apiKey = lookupApiKey(props);
+            props.setProperty(Config.TD_API_KEY, apiKey);
 
-            if (apiKey == null) {
-                if (props.containsKey(Config.TD_API_KEY)) {
-                    apiKey = props.getProperty(Config.TD_API_KEY);
-                }
-            }
+            host = lookupHost(props);
+            props.setProperty(Config.TD_API_SERVER_HOST, host);
 
-            if (apiKey == null) {
-                throw new IllegalArgumentException(String.format(
-                        "APIKey option is required as java property: %s",
-                        Config.TD_LOGGER_API_KEY));
-            }
+            String sport = lookupPort(props);
+            props.setProperty(Config.TD_API_SERVER_PORT, sport);
+            port = Integer.parseInt(sport);
 
-            host = props.getProperty(
-                    Config.TD_LOGGER_API_SERVER_HOST,
-                    Config.TD_LOGGER_API_SERVER_HOST_DEFAULT);
-            port = Integer.parseInt(props.getProperty(
-                    Config.TD_LOGGER_API_SERVER_PORT,
-                    Config.TD_LOGGER_API_SERVER_PORT_DEFAULT));
+            String scheme = lookupScheme(props);
+            props.setProperty(Config.TD_CK_API_SERVER_SCHEME, scheme);
+
             key = String.format("%s_%s_%s_%d", database, apiKey, host, port);
         } else {
-            host = props.getProperty(
-                    Config.TD_LOGGER_AGENT_HOST,
-                    Config.TD_LOGGER_AGENT_HOST_DEFAULT);
-            port = Integer.parseInt(props.getProperty(
-                    Config.TD_LOGGER_AGENT_PORT,
-                    Config.TD_LOGGER_AGENT_PORT_DEFAULT));
+            host = lookupHost(props);
+            port = Integer.parseInt(lookupPort(props));
+
             agentTag = props.getProperty(
                     Config.TD_LOGGER_AGENT_TAG,
                     Config.TD_LOGGER_AGENT_TAG_DEFAULT);

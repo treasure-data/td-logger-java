@@ -54,11 +54,15 @@ public interface Constants extends com.treasure_data.client.Constants {
 
     String TD_LOGGER_API_SERVER_HOST = "td.logger.api.server.host";
 
-    String TD_LOGGER_API_SERVER_HOST_DEFAULT = "api.treasure-data.com";
+    String TD_LOGGER_API_SERVER_HOST_DEFAULT = Config.TD_API_SERVER_HOST_DEFAULTVALUE;
 
     String TD_LOGGER_API_SERVER_PORT = "td.logger.api.server.port";
 
-    String TD_LOGGER_API_SERVER_PORT_DEFAULT = "80";
+    String TD_LOGGER_API_SERVER_PORT_DEFAULT = Config.TD_API_SERVER_PORT_DEFAULTVALUE;
+
+    String TD_LOGGER_API_SERVER_SCHEME = "td.logger.api.server.scheme";
+
+    String TD_LOGGER_API_SERVER_SCHEME_DEFAULT = Config.TD_API_SERVER_SCHEME_HTTPS;
 
     String TD_LOGGER_AUTO_CREATE_TABLE = "td.logger.create.table.auto";
 
