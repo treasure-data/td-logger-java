@@ -27,7 +27,7 @@ Java >= 1.6
 
 You can download all-in-one jar file for Treasure Data Logger.
 
-    $ wget http://maven.treasure-data.com/com/treasure_data/td-logger/${logger.version}/td-logger-${logger.version}-jar-with-dependencies.jar
+    $ wget http://central.maven.org/maven2/com/treasuredata/td-logger/${logger.version}/td-logger-${logger.version}-jar-with-dependencies.jar
 
 To use Treasure Data Logger for Java, set the above jar file to your classpath.
 
