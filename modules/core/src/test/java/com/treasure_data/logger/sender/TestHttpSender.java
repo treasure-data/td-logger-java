@@ -80,7 +80,11 @@ public class TestHttpSender {
         });
         TimeUnit.SECONDS.sleep(1);
 
-        Properties props = System.getProperties();
+        Properties props = new Properties();
+        props.setProperty(Config.TD_API_KEY, "dummy");
+        props.setProperty(Config.TD_API_SERVER_HOST, "localhost");
+        props.setProperty(Config.TD_API_SERVER_PORT, "" + server.getLocalPort());
+        props.setProperty(Config.TD_CK_API_SERVER_SCHEME, "http://");
         final HttpSender sender = new HttpSender(props, "localhost", server.getLocalPort(), "dummy");
         sender.startBackgroundProcess();
         HashMap<String, Object> records = new HashMap<String, Object>();
