@@ -23,20 +23,20 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>core</module>
-        <module>gae</module>
+        <module>modules/core</module>
+        <module>modules/gae</module>
       </modules>
     </profile>
     <profile>
       <id>core</id>
       <modules>
-        <module>core</module>
+        <module>modules/core</module>
       </modules>
     </profile>
     <profile>
       <id>gae</id>
       <modules>
-        <module>gae</module>
+        <module>modules/gae</module>
       </modules>
     </profile>
   </profiles>
