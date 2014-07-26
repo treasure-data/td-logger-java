@@ -102,11 +102,18 @@ The default value is `true`.
 
 Also note that if the `TREASURE_DATA_API_KEY` environment variable is set, `td.logger.agentmode = false` will be set by default.
 
-Generally speaking if you want to directly upload event logs from your application, you should set your own values to the
-following properties:
+If you want to directly upload event logs from your application, you should set your own values to the following properties:
 
     td.logger.agentmode=false
     td.logger.api.key=<your API key>
+
+You also can configure api endpoint like following:
+
+    td.logger.agentmode=false
+    td.logger.api.key=<your API key>
+    td.logger.api.server.scheme=https://
+    td.logger.api.server.host=api.treasuredata.com
+    td.logger.api.server.port=443
 
 On the other hand if you want to upload data via td-agent, you should declare the following properties:
 
