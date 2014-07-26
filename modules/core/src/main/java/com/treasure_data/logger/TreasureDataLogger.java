@@ -44,85 +44,89 @@ public class TreasureDataLogger extends FluentLogger {
      * Define order for API key lookup.
      * 1. lookup ENV['TD_API_KEY']
      * 2. lookup props's 'td.logger.api.key'
-     * 3. lookup props's 'td.api.key'
-     * 4. if not found, throw exception
      */
     private static String lookupApiKey(Properties props) {
+        // 1. lookup from ENV['TD_API_KEY']
         String apiKey = System.getenv(Config.TD_ENV_API_KEY);
+        if (apiKey == null) {
+            // 2. lookup from system property 'td.logger.api.key'
+            if (props.containsKey(Config.TD_LOGGER_API_KEY)) {
+                apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
+            }
+        }
+
+        // if apikey exists, write/overwride it to 'td.api.key'
         if (apiKey != null) {
-            return apiKey;
+            props.setProperty(Config.TD_API_KEY, apiKey);
         }
 
-        if (props.containsKey(Config.TD_LOGGER_API_KEY)) {
-            return props.getProperty(Config.TD_LOGGER_API_KEY);
-        }
-
-        if (props.containsKey(Config.TD_API_KEY)) {
-            return props.getProperty(Config.TD_API_KEY);
-        }
-
-        throw new IllegalArgumentException(
-                "If you use td-logger with non-agent mode, it requires your TreasureData's API key. " +
-                "You should it your to system property 'td.logger.api.key' or 'td.api.key'");
+        return apiKey;
     }
 
     /**
      * Define order for hostname lookup.
      * 1. lookup props's td.logger.api.server.host
-     * 2. lookup props's td.api.server.host
-     * 3. return default value
      */
     private static String lookupHost(Properties props) {
+        String host = null;
+
+        // 1. lookup system property 'td.logger.api.server.host'
         if (props.containsKey(Config.TD_LOGGER_API_SERVER_HOST)) {
-            return props.getProperty(Config.TD_LOGGER_API_SERVER_HOST);
+            host = props.getProperty(Config.TD_LOGGER_API_SERVER_HOST);
         }
 
-        if (props.containsKey(Config.TD_API_SERVER_HOST)) {
-            return props.getProperty(Config.TD_API_SERVER_HOST);
+        // if not exists, set default value
+        if (host == null) {
+            host = Config.TD_LOGGER_API_SERVER_HOST_DEFAULT;
         }
 
-        return Config.TD_LOGGER_API_SERVER_HOST_DEFAULT;
+        // write/overwrite it to 'td.api.server.host'
+        props.setProperty(Config.TD_API_SERVER_HOST, host);
+        return host;
     }
 
     /**
      * Define order for port num lookup.
      * 1. lookup props's td.logger.api.server.port
-     * 2. lookup props's td.api.server.port
-     * 3. return default value
      */
     private static String lookupPort(Properties props) {
+        String port = null;
+
+        // 1. lookup system property 'td.logger.api.server.port'
         if (props.containsKey(Config.TD_LOGGER_API_SERVER_PORT)) {
-            return props.getProperty(Config.TD_LOGGER_API_SERVER_PORT);
+            port = props.getProperty(Config.TD_LOGGER_API_SERVER_PORT);
         }
 
-        if (props.containsKey(Config.TD_API_SERVER_PORT)) {
-            return props.getProperty(Config.TD_API_SERVER_PORT);
+        // if not exists, set defualt value
+        if (port == null) {
+            port = Config.TD_LOGGER_API_SERVER_PORT_DEFAULT;
         }
 
-        return Config.TD_LOGGER_API_SERVER_PORT_DEFAULT;
+        // write/overwrite it to 'td.api.server.port'
+        props.setProperty(Config.TD_API_SERVER_PORT, port);
+        return port;
     }
 
     /**
      * Define order for scheme lookup.
-     * 1. lookup props's td.api.server.scheme
-     * 2. check props's td.api.server.port and suggest scheme
-     * 3. return default value
+     * 1. lookup props's td.logger.api.server.scheme
      */
     private static String lookupScheme(Properties props) {
-        if (props.containsKey(Config.TD_CK_API_SERVER_SCHEME)) {
-            return props.getProperty(Config.TD_CK_API_SERVER_SCHEME);
+        String scheme = null;
+
+        // 1. lookup system property 'td.logger.api.server.scheme'
+        if (props.containsKey(Config.TD_LOGGER_API_SERVER_SCHEME)) {
+            scheme = props.getProperty(Config.TD_LOGGER_API_SERVER_SCHEME);
         }
 
-        if (props.containsKey(Config.TD_API_SERVER_PORT)) {
-            String sport = props.getProperty(Config.TD_API_SERVER_PORT);
-            if (sport.equals("80")) {
-                return Config.TD_API_SERVER_SCHEME_HTTP;
-            } else if (sport.equals("443")) {
-                return Config.TD_API_SERVER_SCHEME_HTTPS;
-            }
+        // if not exists, set default value
+        if (scheme == null) {
+            scheme = Config.TD_LOGGER_API_SERVER_SCHEME_DEFAULT;
         }
 
-        return Config.TD_API_SERVER_SCHEME_DEFAULTVALUE;
+        // write/overwrite it to 'td.api.server.port'
+        props.setProperty(Config.TD_CK_API_SERVER_SCHEME, scheme);
+        return scheme;
     }
 
     public static synchronized TreasureDataLogger getLogger(
@@ -141,17 +145,9 @@ public class TreasureDataLogger extends FluentLogger {
 
         if (!agentMode) {
             apiKey = lookupApiKey(props);
-            props.setProperty(Config.TD_API_KEY, apiKey);
-
             host = lookupHost(props);
-            props.setProperty(Config.TD_API_SERVER_HOST, host);
-
-            String sport = lookupPort(props);
-            props.setProperty(Config.TD_API_SERVER_PORT, sport);
-            port = Integer.parseInt(sport);
-
-            String scheme = lookupScheme(props);
-            props.setProperty(Config.TD_CK_API_SERVER_SCHEME, scheme);
+            port = Integer.parseInt(lookupPort(props));
+            lookupScheme(props);
 
             key = String.format("%s_%s_%s_%d", database, apiKey, host, port);
         } else {
