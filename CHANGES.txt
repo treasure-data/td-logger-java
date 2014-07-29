@@ -1,9 +1,10 @@
 Release 0.2.0 - 20XX/XX/XX
   IMPROVEMENTS
     Upgrades td-client 0.5.1
+    Refines logging within HttpSender, HttpSenderThread and ExtendedPacker classes.
 
   BUG FIXMES
-    changes behavior of HttpSender#emit(..). If passed records (Map<String, Object>  objects) have 'time' key, HttpSender sends the records directly to Treasure Data. If not have 'time' key, HttpSender appends 'time' data to the records and sends it. The value of the 'time' key is created with System#currentTimeMillis().
+    Changes behavior of HttpSender#emit(..). If passed records (Map<String, Object>  objects) have 'time' key, HttpSender sends the records directly to Treasure Data. If not have 'time' key, HttpSender appends 'time' data to the records and sends it. The value of the 'time' key is created with System#currentTimeMillis().
 
 Release 0.1.5 - 2013/05/28
   IMPROVEMENTS
