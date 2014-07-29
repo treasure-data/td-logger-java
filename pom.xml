@@ -24,7 +24,9 @@
       </activation>
       <modules>
         <module>modules/core</module>
+        <!--
         <module>modules/gae</module>
+        -->
       </modules>
     </profile>
     <profile>
