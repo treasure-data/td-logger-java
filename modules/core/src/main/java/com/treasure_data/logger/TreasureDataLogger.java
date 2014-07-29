@@ -42,24 +42,15 @@ public class TreasureDataLogger extends FluentLogger {
 
     /**
      * Define order for API key lookup.
-     * 1. lookup ENV['TD_API_KEY']
-     * 2. lookup props's 'td.logger.api.key'
+     * 1. lookup props's 'td.logger.api.key'
      */
     private static String lookupApiKey(Properties props) {
-        // 1. lookup from ENV['TD_API_KEY']
-        String apiKey = System.getenv(Config.TD_ENV_API_KEY);
-        if (apiKey == null) {
-            // 2. lookup from system property 'td.logger.api.key'
-            if (props.containsKey(Config.TD_LOGGER_API_KEY)) {
-                apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
-            }
-        }
-
-        // if apikey exists, write/overwride it to 'td.api.key'
-        if (apiKey != null) {
+        String apiKey = null;
+        // lookup from system property td.logger.api.key. If it exists, writes/updates td.api.key.
+        if (props.containsKey(Config.TD_LOGGER_API_KEY)) {
+            apiKey = props.getProperty(Config.TD_LOGGER_API_KEY);
             props.setProperty(Config.TD_API_KEY, apiKey);
         }
-
         return apiKey;
     }
 
