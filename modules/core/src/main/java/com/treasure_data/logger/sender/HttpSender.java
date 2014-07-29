@@ -184,8 +184,9 @@ public class HttpSender implements Sender {
         try {
             packer.write(record);
         } catch (Exception e) {
-            LOG.severe(String.format("Cannot serialize data to %s.%s",
-                    databaseName, tableName));
+            LOG.log(Level.SEVERE, String.format("Cannot serialize data to %s.%s",
+                    databaseName, tableName), e);
+
             chunks.remove(key);
             return false;
         }
