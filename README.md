@@ -4,10 +4,10 @@
 
 Many web/mobile applications generate huge amount of event logs (c,f. login,
 logout, purchase, follow, etc).  Analyzing these event logs can be quite
-valuable for improving services.  However, collecting these logs easily and 
+valuable for improving services.  However, collecting these logs easily and
 reliably is a challenging task.
 
-Treasure Data Logger solves the problem by having: easy installation, small 
+Treasure Data Logger solves the problem by having: easy installation, small
 footprint, plugins reliable buffering, log forwarding, etc.
 
   * Treasure Data website: [http://treasuredata.com/](http://treasure-data.com/)
@@ -53,7 +53,7 @@ You can configure your pom.xml as follows to use it:
         <url>http://fluentd.org/maven2</url>
       </repository>
     </repositories>
-    
+
 ### Install with SBT (Build tool Scala)
 
 To install td-logger From SBT (a build tool for Scala), please add the following lines to your build.sbt.
@@ -76,7 +76,7 @@ You can get latest source code using git.
     $ cd td-logger-java
     $ mvn package
 
-You will get the td-logger jar file in td-logger-java/target 
+You will get the td-logger jar file in td-logger-java/target
 directory.  File name will be td-logger-${logger.version}-jar-with-dependencies.jar.
 For more detail, see pom.xml.
 
@@ -120,7 +120,7 @@ On the other hand if you want to upload data via td-agent, you should declare th
     td.logger.agentmode=true
     td.logger.agent.host=<your td-agent host>
     td.logger.agent.port=<your td-agent port>
-    
+
 See below for the description of each of these properties.
 
 ### Agent's Host and Port
@@ -151,11 +151,11 @@ The default value is `1048576` bytes (1 MB).
 
 ### REST APIs Key
 
-In order for the logger to be able to authenticate with your account in the Treasure Data Cloud, the REST APIs require an API key. The key can be provided by the `td.logger.api.key` property. 
+In order for the logger to be able to authenticate with your account in the Treasure Data Cloud, the REST APIs require an API key. The key can be provided by the `td.logger.api.key` property.
 
 This property does not have a default value.
 
-Alternatively the API key can be provided via the `TREASURE_DATA_API_KEY` environment variable. The environment variable takes precedene over the `td.logger.api.key` property.
+Alternatively the API key can be provided via the `TREASURE_DATA_API_KEY` environment variable. The environment variable takes precedence over the `td.logger.api.key` property.
 
 Please note that we recommend to use a write-only API key. To obtain one, please:
 
@@ -166,7 +166,7 @@ Please note that we recommend to use a write-only API key. To obtain one, please
 
 ### REST APIs Server Host and Port
 
-The Treasure Data REST APIs Server host and port can be specified using the `td.logger.api.server.host` and `td.logger.api.server.port` properties.
+The Treasure Data REST APIs Server host and port can be specified using the `td.logger.api.server.host`, `td.logger.api.server.port`, `td.logger.api.server.scheme` properties.
 
 Their default values are `api.treasuredata.com` and `80` respectively.
 
@@ -215,13 +215,13 @@ See static initializer in Main class.  To create TreasureDataLogger objects,
 you need to invoke getLogger method in TreasureDataLogger class like
 well-known logging libraries.  The method should be called only once.
 
-Close method in TreasureDataLogger class should be called explicitly when 
-your application is finished (or undeployed).  Once the method is executed,
+The close method in the TreasureDataLogger class should be called explicitly
+when your application is finished (or unloaded). Once the method is executed,
 all TreasureDataLogger objects that you created are closed.
 
     TreasureDataLogger.close();
 
-See doApp method in Main class.  log method enables you to upload event logs.
+See doApp method in the Main class. The log method enables you to upload event logs.
 Event logs should be declared as variables of Map\<String, Object\> type.
 The key is String type.  The type of value is one of the followings: int,
 long, string, float, double.
