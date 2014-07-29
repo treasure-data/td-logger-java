@@ -61,7 +61,7 @@ class ExtendedPacker {
                         LOG.warning("Went over soft limit of record keys");
                     } else if (keys.size() == keyHardLimit) {
                         String msg = "Went over hard limit of record keys";
-                        LOG.severe("Went over soft limit of record keys");
+                        LOG.severe(msg);
                         throw new IllegalStateException(msg);
                     }
                 }
