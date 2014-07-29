@@ -19,6 +19,7 @@ package com.treasure_data.logger;
 
 import java.lang.reflect.Constructor;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.treasure_data.logger.sender.HttpSender;
@@ -40,7 +41,7 @@ public class Config extends com.treasure_data.client.Config implements Constants
                     Properties.class, String.class, int.class, String.class);
             return cons.newInstance(props, host, port, apiKey);
         } catch (Exception e) {
-            LOG.throwing(Config.class.getName(), "createSender", e);
+            LOG.log(Level.WARNING, "Cannot create sender object by reflection. fall back", e);
         }
         return new HttpSender(props, host, port, apiKey);
     }

@@ -98,8 +98,7 @@ class HttpSenderThread implements Runnable {
             try {
                 sender.flush0(true);
             } catch (IOException e) {
-                LOG.severe("Failed to store event logs on queue, trashed");
-                LOG.throwing(this.getClass().getName(), "tryFlush", e);
+                LOG.log(Level.SEVERE, "Failed to store event logs on queue, trashed", e);
             }
         }
 
@@ -118,12 +117,10 @@ class HttpSenderThread implements Runnable {
                 flushed = true;
             } catch (Exception e) {
                 if (errorCount < retryLimit) {
-                    LOG.severe("Failed to upload event logs to Treasure Data, retrying");
-                    LOG.throwing(this.getClass().getName(), "tryFlush", e);
+                    LOG.log(Level.WARNING, "Failed to upload event logs to Treasure Data, retrying", e);
                     errorCount += 1;
                 } else {
-                    LOG.severe("Failed to upload event logs to Treasure Data, trashed");
-                    LOG.throwing(this.getClass().getName(), "tryFlush", e);
+                    LOG.log(Level.SEVERE, "Failed to upload event logs to Treasure Data, trashed", e);
                     errorCount = 0;
                     sender.queue.clear();
                 }

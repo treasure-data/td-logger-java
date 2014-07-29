@@ -176,8 +176,7 @@ public class HttpSender implements Sender {
         try {
             packer = getPacker(key);
         } catch (IOException e) {
-            LOG.severe("Cannot create packer object");
-            LOG.throwing(this.getClass().getName(), "emit0", e);
+            LOG.log(Level.SEVERE, "Cannot create packer object", e);
             return false;
         }
 
@@ -200,7 +199,7 @@ public class HttpSender implements Sender {
                             new Object[] { getQueueSize() }));
                 }
             } catch (IOException e) {
-                LOG.throwing(this.getClass().getName(), "emit0", e);
+                LOG.log(Level.WARNING, "Cannot execute getByteArray()", e);
             } finally {
                 chunks.remove(key);
             }
@@ -265,7 +264,7 @@ public class HttpSender implements Sender {
                     byte[] bytes = entry.getValue().getByteArray();
                     putQueue(databaseName, tableName, bytes);
                 } catch (IOException e) {
-                    LOG.throwing(this.getClass().getName(), "flushChunks", e);
+                    LOG.log(Level.WARNING, "Cannot execute getByteArray()", e);
                 }
             }
         }
