@@ -44,6 +44,8 @@ class ExtendedPacker {
 
     private List<String> keys = new ArrayList<String>(keySoftLimit);
 
+    private long rowSize = 0;
+
     ExtendedPacker(MessagePack msgpack) throws IOException {
         out = new ByteArrayOutputStream();
         gzout = new GZIPOutputStream(out);
@@ -70,6 +72,7 @@ class ExtendedPacker {
             }
         }
         packer.writeMapEnd();
+        rowSize++;
         return this;
     }
 
@@ -80,5 +83,9 @@ class ExtendedPacker {
     byte[] getByteArray() throws IOException {
         gzout.finish();
         return out.toByteArray();
+    }
+
+    long getRowSize() {
+        return rowSize;
     }
 }

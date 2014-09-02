@@ -24,18 +24,21 @@ public class QueueEvent {
 
     public byte[] data;
 
+    public long rowSize;
+
     public QueueEvent() {
     }
 
-    public QueueEvent(String databaseName, String tableName, byte[] data) {
+    public QueueEvent(String databaseName, String tableName, byte[] data, long rowSize) {
         this.databaseName = databaseName;
         this.tableName = tableName;
         this.data = data;
+        this.rowSize = rowSize;
     }
 
     @Override
     public String toString() {
-        return String.format("Event{database=%s,table=%s,data.size=%d}",
-                new Object[] { databaseName, tableName, data.length });
+        return String.format("Event{database=%s,table=%s,data.size=%d, row.size=%d}",
+                new Object[] { databaseName, tableName, data.length, rowSize });
     }
 }

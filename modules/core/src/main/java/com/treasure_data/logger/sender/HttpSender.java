@@ -193,7 +193,7 @@ public class HttpSender implements Sender {
 
         if (packer.getChunkSize() > chunkLimit) {
             try {
-                putQueue(databaseName, tableName, packer.getByteArray());
+                putQueue(databaseName, tableName, packer.getByteArray(), packer.getRowSize());
 
                 if (LOG.isLoggable(Level.FINE)) {
                     LOG.fine(String.format("Put event on queue (size: %d)",
@@ -212,9 +212,9 @@ public class HttpSender implements Sender {
         return queue.size();
     }
 
-    protected void putQueue(String databaseName, String tableName, byte[] bytes) {
+    protected void putQueue(String databaseName, String tableName, byte[] bytes, long rowSize) {
         try {
-            queue.put(new QueueEvent(databaseName, tableName, bytes));
+            queue.put(new QueueEvent(databaseName, tableName, bytes, rowSize));
         } catch (InterruptedException e) { // ignore
         }
     }
@@ -262,8 +262,10 @@ public class HttpSender implements Sender {
                 String databaseName = splited[0];
                 String tableName = splited[1];
                 try {
-                    byte[] bytes = entry.getValue().getByteArray();
-                    putQueue(databaseName, tableName, bytes);
+                    ExtendedPacker packer = entry.getValue();
+                    byte[] bytes = packer.getByteArray();
+                    long size = packer.getRowSize();
+                    putQueue(databaseName, tableName, bytes, size);
                 } catch (IOException e) {
                     LOG.log(Level.WARNING, "Cannot execute getByteArray()", e);
                 }

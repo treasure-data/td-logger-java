@@ -52,7 +52,7 @@ public class TestHttpSenderThread {
         byte[] bytes = out.toByteArray();
         System.out.println(bytes.length);
 
-        QueueEvent ev = new QueueEvent("mugadb", "table01", bytes);
+        QueueEvent ev = new QueueEvent("mugadb", "table01", bytes, 20);
         thread.uploadEvent(ev);
     }
 }
