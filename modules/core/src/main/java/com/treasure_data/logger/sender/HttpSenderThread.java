@@ -134,7 +134,7 @@ class HttpSenderThread implements Runnable {
         boolean retry = true;
         while (retry) {
             try {
-                LOG.info(String.format("Uploading event logs to %s.%s on TreasureData (%d bytes %d records)",
+                LOG.info(String.format("Uploading event logs to %s.%s on TreasureData (%d bytes, %d records)",
                         ev.databaseName, ev.tableName, ev.data.length, ev.rowSize));
 
                 Table table = new Table(new Database(ev.databaseName), ev.tableName);
