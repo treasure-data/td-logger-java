@@ -282,8 +282,12 @@ public class HttpSender implements Sender {
     }
 
     @Override
+    public boolean isConnected() {
+        return false; // is not used at all.
+    }
+
+    @Override
     public String toString() {
         return getName();
     }
-
 }
