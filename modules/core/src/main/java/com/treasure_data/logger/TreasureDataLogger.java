@@ -76,6 +76,21 @@ public class TreasureDataLogger extends FluentLogger {
         return host;
     }
 
+    private static String lookupAgentHost(Properties props) {
+        String host = null;
+
+        if (props.containsKey(Config.TD_LOGGER_AGENT_HOST)) {
+            host = props.getProperty(Config.TD_LOGGER_AGENT_HOST);
+        }
+
+        // if not exists, set default value; localhost
+        if (host == null) {
+            host = Config.TD_LOGGER_AGENT_HOST_DEFAULT;
+        }
+
+        return host;
+    }
+
     /**
      * Define order for port num lookup.
      * 1. lookup props's td.logger.api.server.port
@@ -95,6 +110,20 @@ public class TreasureDataLogger extends FluentLogger {
 
         // write/overwrite it to 'td.api.server.port'
         props.setProperty(Config.TD_API_SERVER_PORT, port);
+        return port;
+    }
+
+    private static String lookupAgentPort(Properties props) {
+        String port = null;
+
+        if (props.containsKey(Config.TD_LOGGER_AGENT_PORT)) {
+            port = props.getProperty(Config.TD_LOGGER_AGENT_PORT);
+        }
+
+        if (port == null) {
+            port = Config.TD_LOGGER_AGENT_PORT_DEFAULT;
+        }
+
         return port;
     }
 
@@ -142,8 +171,8 @@ public class TreasureDataLogger extends FluentLogger {
 
             key = String.format("%s_%s_%s_%d", database, apiKey, host, port);
         } else {
-            host = lookupHost(props);
-            port = Integer.parseInt(lookupPort(props));
+            host = lookupAgentHost(props);
+            port = Integer.parseInt(lookupAgentPort(props));
 
             agentTag = props.getProperty(
                     Config.TD_LOGGER_AGENT_TAG,
