@@ -86,7 +86,7 @@ For more detail, see pom.xml.
 ## Configuration
 
 This logging library provides a variety of configuration options as Java System properties.
-These options can be specified on the comamnd-line or using a properties file and loading it in the system properties at runtime.
+These options can be specified on the command-line or using a properties file and loading it in the system properties at runtime.
 
     Properties props = System.getProperties();
     props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
@@ -133,7 +133,7 @@ Their default value is `localhost` and `24224` respectively.
 
 Treasure Agent marks the logging events using a 'tag', which is formed by a series of alphanumeric strings separated by a period character: e.g. 'string1.string2.string3'. Events created this logger are tagged with the database and table name the events are expected to be imported to. On the receiving end, the Treasure Agent, the database and table name will be used to determine the final database and table destination in the Treasure Data Cloud.
 
-The `td.logger.agent.tag` properties provides the ability to set a fixed prefix for the tag that will be automatically added to all events logged by the library. For example, if events are destined to the 'mydb' database, and 'mytable' table within it, setting the `td.logger.agent.tag` property to `mycomp` will cause the tag to become `mycomp.mydb.mytable` as opposed to the default `td.mydb.mytable`. This is very important as the tag matching on the Treasure Agent side will need to be `mycomp.*.*` as opposed to the standard `td.*.*`.
+The `td.logger.agent.tag` properties provide the ability to set a fixed prefix for the tag that will be automatically added to all events logged by the library. For example, if events are destined to the 'mydb' database, and 'mytable' table within it, setting the `td.logger.agent.tag` property to `mycomp` will cause the tag to become `mycomp.mydb.mytable` as opposed to the default `td.mydb.mytable`. This is very important as the tag matching on the Treasure Agent side will need to be `mycomp.*.*` as opposed to the standard `td.*.*`.
 
 The default value is `td`.
 
