@@ -124,12 +124,6 @@ public class HttpSender implements Sender {
         new Thread(senderThread).start();
     }
 
-    private synchronized Map<String, ExtendedPacker> recreateChunks() {
-        Map<String, ExtendedPacker> tmp = chunks;
-        chunks = new ConcurrentHashMap<String, ExtendedPacker>();
-        return tmp;
-    }
-
     public boolean emit(String tag, Map<String, Object> record) {
         if (record.containsKey("time")) {
             return emit0(tag, record);
@@ -184,27 +178,20 @@ public class HttpSender implements Sender {
         try {
             packer.write(record);
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, String.format("Cannot serialize data to %s.%s",
-                    databaseName, tableName), e);
+            LOG.log(Level.SEVERE, String.format("Cannot write record to the (%s.%s) packer object:", databaseName, tableName), e);
+            LOG.log(Level.SEVERE, record.toString());
 
+            // Since packer object is refreshed, the remove method is not necessary. but, just in case,
+            // if some problem occurred, it removes packer object itself.
             chunks.remove(key);
             return false;
         }
 
         if (packer.getChunkSize() > chunkLimit) {
-            try {
-                putQueue(databaseName, tableName, packer.getByteArray(), packer.getRowSize());
-
-                if (LOG.isLoggable(Level.FINE)) {
-                    LOG.fine(String.format("Put event on queue (size: %d)",
-                            new Object[] { getQueueSize() }));
-                }
-            } catch (IOException e) {
-                LOG.log(Level.WARNING, "Cannot execute getByteArray()", e);
-            } finally {
-                chunks.remove(key);
-            }
+            putQueue(databaseName, tableName, packer);
+            LOG.fine(String.format("Put event on queue (size: %d)", getQueueSize()));
         }
+
         return true;
     }
 
@@ -212,15 +199,21 @@ public class HttpSender implements Sender {
         return queue.size();
     }
 
-    protected void putQueue(String databaseName, String tableName, byte[] bytes, long rowSize) {
+    protected void putQueue(String databaseName, String tableName, ExtendedPacker packer) {
         try {
+            long rowSize = packer.getRowSize();
+            byte[] bytes = packer.getByteArray(); // it should be called after getRowSize is called.
             queue.put(new QueueEvent(databaseName, tableName, bytes, rowSize));
+
+        } catch (IOException e) { // ignore
+            LOG.log(Level.WARNING, "Cannot execute getByteArray()", e);
+
         } catch (InterruptedException e) { // ignore
         }
     }
 
     private synchronized ExtendedPacker getPacker(String key) throws IOException {
-        ExtendedPacker packer = null;
+        ExtendedPacker packer;
         if (!chunks.containsKey(key)) {
             packer = new ExtendedPacker(msgpack);
             chunks.put(key, packer);
@@ -256,19 +249,12 @@ public class HttpSender implements Sender {
 
     synchronized void flush0(boolean isThread) throws IOException {
         if (!chunks.isEmpty()) {
-            Map<String, ExtendedPacker> chunks0 = recreateChunks();
-            for (Map.Entry<String, ExtendedPacker> entry : chunks0.entrySet()) {
+            for (Map.Entry<String, ExtendedPacker> entry : chunks.entrySet()) {
                 String[] splited = entry.getKey().split("\\.");
                 String databaseName = splited[0];
                 String tableName = splited[1];
-                try {
-                    ExtendedPacker packer = entry.getValue();
-                    byte[] bytes = packer.getByteArray();
-                    long size = packer.getRowSize();
-                    putQueue(databaseName, tableName, bytes, size);
-                } catch (IOException e) {
-                    LOG.log(Level.WARNING, "Cannot execute getByteArray()", e);
-                }
+                ExtendedPacker packer = entry.getValue();
+                putQueue(databaseName, tableName, packer);
             }
         }
         if (!isThread) {

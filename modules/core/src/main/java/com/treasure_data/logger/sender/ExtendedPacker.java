@@ -32,36 +32,40 @@ import org.msgpack.template.Templates;
 class ExtendedPacker {
     private static Logger LOG = Logger.getLogger(ExtendedPacker.class.getName());
 
-    private static int keySoftLimit = 256;
+    private static final int KEY_SOFT_LIMIT = 256;
+    private static final int KEY_HARD_LIMIT = 512;
 
-    private static int keyHardLimit = 512;
+    private final MessagePack msgpack;
 
     private Packer packer;
-
     private ByteArrayOutputStream out;
-
     private GZIPOutputStream gzout;
-
-    private List<String> keys = new ArrayList<String>(keySoftLimit);
-
-    private long rowSize = 0;
+    private List<String> keys;
+    private long rowSize;
 
     ExtendedPacker(MessagePack msgpack) throws IOException {
+        this.msgpack = msgpack;
+        refresh();
+    }
+
+    private void refresh() throws IOException {
         out = new ByteArrayOutputStream();
         gzout = new GZIPOutputStream(out);
         packer = msgpack.createPacker(gzout);
+        keys = new ArrayList<String>(KEY_SOFT_LIMIT);
+        rowSize = 0;
     }
 
-    ExtendedPacker write(Map<String, Object> v) throws IOException {
+    synchronized ExtendedPacker write(Map<String, Object> v) throws IOException {
         packer.writeMapBegin(v.size());
         {
             for (Map.Entry<String, Object> entry : v.entrySet()) {
                 String key = entry.getKey();
                 if (!keys.contains(key)) {
                     keys.add(key);
-                    if (keys.size() == keySoftLimit) {
+                    if (keys.size() == KEY_SOFT_LIMIT) {
                         LOG.warning("Went over soft limit of record keys");
-                    } else if (keys.size() == keyHardLimit) {
+                    } else if (keys.size() == KEY_HARD_LIMIT) {
                         String msg = "Went over hard limit of record keys";
                         LOG.severe(msg);
                         throw new IllegalStateException(msg);
@@ -80,9 +84,14 @@ class ExtendedPacker {
         return out.size();
     }
 
-    byte[] getByteArray() throws IOException {
-        gzout.finish();
-        return out.toByteArray();
+    synchronized byte[] getByteArray() throws IOException {
+        try {
+            gzout.finish();
+            return out.toByteArray();
+
+        } finally {
+            refresh();
+        }
     }
 
     long getRowSize() {
