@@ -41,7 +41,7 @@ class ExtendedPacker {
     private ByteArrayOutputStream out;
     private GZIPOutputStream gzout;
     private List<String> keys;
-    private long rowSize;
+    private long rowCount;
 
     ExtendedPacker(MessagePack msgpack) throws IOException {
         this.msgpack = msgpack;
@@ -53,7 +53,7 @@ class ExtendedPacker {
         gzout = new GZIPOutputStream(out);
         packer = msgpack.createPacker(gzout);
         keys = new ArrayList<String>(KEY_SOFT_LIMIT);
-        rowSize = 0;
+        rowCount = 0;
     }
 
     synchronized ExtendedPacker write(Map<String, Object> v) throws IOException {
@@ -76,7 +76,7 @@ class ExtendedPacker {
             }
         }
         packer.writeMapEnd();
-        rowSize++;
+        rowCount++;
         return this;
     }
 
@@ -86,7 +86,7 @@ class ExtendedPacker {
 
     synchronized byte[] getByteArray() throws IOException {
         try {
-            gzout.finish();
+            gzout.close();
             return out.toByteArray();
 
         } finally {
@@ -94,7 +94,7 @@ class ExtendedPacker {
         }
     }
 
-    long getRowSize() {
-        return rowSize;
+    long getRowCount() {
+        return rowCount;
     }
 }

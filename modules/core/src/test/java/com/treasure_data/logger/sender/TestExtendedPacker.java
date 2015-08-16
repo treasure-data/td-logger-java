@@ -34,45 +34,27 @@ public class TestExtendedPacker {
 
         // expect
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Packer packer = msgpack.createPacker(out);
-        for (int i = 0; i < 100; i++) {
-            Map<String, Object> data = new HashMap<String, Object>();
-            data.put("ki:" + i, "vi:" + i);
-            data.put("ki:" + i, i);
-            packer.write(data);
-        }
-        out.flush();
-        out.close();
-        byte[] expected = out.toByteArray();
-        out = new ByteArrayOutputStream();
         GZIPOutputStream gzout = new GZIPOutputStream(out);
-        gzout.write(expected);
-        gzout.finish();
-        int expectedSize = out.size();
+        Packer packer = msgpack.createPacker(gzout);
 
         // actual
         ExtendedPacker extpacker = new ExtendedPacker(msgpack);
+
         for (int i = 0; i < 100; i++) {
             Map<String, Object> data = new HashMap<String, Object>();
             data.put("ki:" + i, "vi:" + i);
             data.put("ki:" + i, i);
+
+            packer.write(data);
             extpacker.write(data);
         }
-        out = new ByteArrayOutputStream();
-        GZIPInputStream gzin = new GZIPInputStream(new ByteArrayInputStream(extpacker.getByteArray()));
-        while (true) {
-            int len = gzin.read();
-            if (len < 0) {
-                break;
-            }
-            out.write(len);
-        }
-        out.flush();
-        out.close();
-        byte[] actual = out.toByteArray();
 
-        assertEquals(expectedSize, extpacker.getChunkSize());
-        assertArrayEquals(expected, actual);
+        packer.flush();
+        gzout.finish();
+
+        assertArrayEquals(out.toByteArray(), extpacker.getByteArray());
+
+        gzout.close();
     }
 
     @Test

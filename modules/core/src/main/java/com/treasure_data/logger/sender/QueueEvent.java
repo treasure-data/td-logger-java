@@ -24,21 +24,21 @@ public class QueueEvent {
 
     public byte[] data;
 
-    public long rowSize;
+    public long rowCount;
 
     public QueueEvent() {
     }
 
-    public QueueEvent(String databaseName, String tableName, byte[] data, long rowSize) {
+    public QueueEvent(String databaseName, String tableName, byte[] data, long rowCount) {
         this.databaseName = databaseName;
         this.tableName = tableName;
         this.data = data;
-        this.rowSize = rowSize;
+        this.rowCount = rowCount;
     }
 
     @Override
     public String toString() {
-        return String.format("Event{database=%s,table=%s,data.size=%d, row.size=%d}",
-                new Object[] { databaseName, tableName, data.length, rowSize });
+        return String.format("Event{database=%s,table=%s,data.size=%d, row.count=%d}",
+                new Object[] { databaseName, tableName, data.length, rowCount});
     }
 }

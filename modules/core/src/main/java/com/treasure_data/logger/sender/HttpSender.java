@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 import org.fluentd.logger.sender.Sender;
 import org.msgpack.MessagePack;
 
-import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.TreasureDataClient;
 
 public class HttpSender implements Sender {
@@ -201,9 +200,9 @@ public class HttpSender implements Sender {
 
     protected void putQueue(String databaseName, String tableName, ExtendedPacker packer) {
         try {
-            long rowSize = packer.getRowSize();
-            byte[] bytes = packer.getByteArray(); // it should be called after getRowSize is called.
-            queue.put(new QueueEvent(databaseName, tableName, bytes, rowSize));
+            long rowCount = packer.getRowCount();
+            byte[] bytes = packer.getByteArray(); // it should be called after getRowCount is called.
+            queue.put(new QueueEvent(databaseName, tableName, bytes, rowCount));
 
         } catch (IOException e) { // ignore
             LOG.log(Level.WARNING, "Cannot execute getByteArray()", e);

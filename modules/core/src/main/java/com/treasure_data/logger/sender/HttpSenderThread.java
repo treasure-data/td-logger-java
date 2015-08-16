@@ -18,8 +18,6 @@
 package com.treasure_data.logger.sender;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -135,7 +133,7 @@ class HttpSenderThread implements Runnable {
         while (retry) {
             try {
                 LOG.info(String.format("Uploading event logs to %s.%s on TreasureData (%d bytes, %d records)",
-                        ev.databaseName, ev.tableName, ev.data.length, ev.rowSize));
+                        ev.databaseName, ev.tableName, ev.data.length, ev.rowCount));
 
                 Table table = new Table(new Database(ev.databaseName), ev.tableName);
 
