@@ -6,7 +6,7 @@
   <parent>
     <artifactId>td-logger-parent</artifactId>
     <groupId>com.treasuredata</groupId>
-    <version>0.2.3-SNAPSHOT</version>
+    <version>0.2.3</version>
     <relativePath>../../</relativePath>
   </parent>
 
@@ -14,7 +14,7 @@
   <artifactId>td-logger</artifactId>
   <name>Treasure Data Logger for Java</name>
   <description>Java implementation of Treasure Data Logger.</description>
-  <version>0.2.3-SNAPSHOT</version>
+  <version>0.2.3</version>
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-logger-java</url>
 
