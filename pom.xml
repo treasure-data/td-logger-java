@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.treasuredata</groupId>
   <artifactId>td-logger-parent</artifactId>
-  <version>0.2.3</version>
+  <version>0.2.4-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Treasure Data Logger Project for Java</name>
   <description>Java implementation of Treasure Data Logger.</description>
