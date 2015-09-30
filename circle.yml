@@ -5,7 +5,7 @@ machine:
 test:
   override:
     - mvn test -P core
-    - cp -R build/reports/* $CIRCLE_ARTIFACTS
+    - cp -af target/site/* $CIRCLE_ARTIFACTS
 
 notify:
   webhooks:
