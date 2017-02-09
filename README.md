@@ -48,9 +48,9 @@ You can configure your pom.xml as follows to use it:
 
     <repositories>
       <repository>
-        <id>fluentd.org</id>
-        <name>Fluentd's Maven Repository</name>
-        <url>http://fluentd.org/maven2</url>
+        <id>central.maven.org</id>
+        <name>td-logger Maven Repository</name>
+        <url>http://central.maven.org/maven2/</url>
       </repository>
     </repositories>
 
