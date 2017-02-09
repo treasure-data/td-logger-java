@@ -61,7 +61,7 @@ To install td-logger From SBT (a build tool for Scala), please add the following
     /* in build.sbt */
     // Repositories
     resolvers ++= Seq(
-      "fluent-logger Maven Repository" at "http://fluentd.org/maven2/"
+      "td-logger Maven Repository" at "http://central.maven.org/maven2/"
     )
     // Dependencies
     libraryDependencies ++= Seq(
@@ -81,7 +81,7 @@ directory.  File name will be td-logger-${logger.version}-jar-with-dependencies.
 For more detail, see pom.xml.
 
 **Replace ${logger.version} with the current version of Treasure Data Logger for Java.**
-**The current version is 0.2.0.**
+**The current version is 0.2.3.**
 
 ## Configuration
 
