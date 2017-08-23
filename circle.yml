@@ -5,6 +5,7 @@ machine:
 test:
   override:
     - mvn test -P core
+    - cp -af modules/core/target/site/jacoco $CIRCLE_ARTIFACTS
 
 notify:
   webhooks:
